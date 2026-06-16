@@ -105,6 +105,11 @@ public class DefaultPluginContext implements PluginContext {
 
         if (!controllers.isEmpty()) {
             log.info("[{}] 自动注册{}个Controller", pluginId, controllers.size());
+            // 注册 OpenAPI 分组，使 Swagger 文档包含插件接口
+            ApplicationContext hostAC = pluginApplicationContext.getParent();
+            if (hostAC != null) {
+                com.agileboot.plugin.openapi.PluginOpenApiConfig.registerPluginOpenApi(hostAC, pluginId, controllers);
+            }
         }
     }
 
@@ -209,6 +214,11 @@ public class DefaultPluginContext implements PluginContext {
     public void unregisterAllControllers() {
         for (Object controller : new ArrayList<>(registeredMappings.keySet())) {
             unregisterController(controller);
+        }
+        // 清理 OpenAPI 注册
+        ApplicationContext hostAC = pluginApplicationContext.getParent();
+        if (hostAC != null) {
+            com.agileboot.plugin.openapi.PluginOpenApiConfig.unregisterPluginOpenApi(hostAC, pluginId);
         }
     }
 
