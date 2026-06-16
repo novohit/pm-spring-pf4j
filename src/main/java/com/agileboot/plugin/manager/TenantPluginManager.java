@@ -1,5 +1,6 @@
 package com.agileboot.plugin.manager;
 
+import com.agileboot.plugin.api.DefaultPluginContext;
 import com.agileboot.plugin.config.PluginProperties;
 import com.agileboot.plugin.config.TenantPluginConfig;
 import com.agileboot.plugin.factory.PmPluginFactory;
@@ -34,6 +35,7 @@ public class TenantPluginManager {
     private final PluginProperties pluginProperties;
     private final ApplicationContext applicationContext;
     private JarPluginManager pf4jManager;
+    private PmPluginFactory pluginFactory;
     private final Map<String, PluginWrapper> loadedPlugins = new ConcurrentHashMap<>();
     private String currentTenantId;
 
@@ -53,12 +55,9 @@ public class TenantPluginManager {
         log.info("Initializing plugins for tenant: {}", currentTenantId);
 
         // 创建PF4J PluginManager，使用自定义PluginFactory
-        pf4jManager = new JarPluginManager() {
-            @Override
-            protected org.pf4j.PluginFactory createPluginFactory() {
-                return new PmPluginFactory(applicationContext, pluginProperties);
-            }
-        };
+        pluginFactory = new PmPluginFactory(applicationContext, pluginProperties);
+        PmJarPluginManager.setPendingFactory(pluginFactory);
+        pf4jManager = new PmJarPluginManager(pluginFactory);
 
         // 加载当前租户的插件
         loadTenantPlugins(currentTenantId);
@@ -154,12 +153,18 @@ public class TenantPluginManager {
         try {
             log.info("Loading plugin: {} from {}", pluginId, jarPath);
 
-            // 使用PF4J加载插件
             String loadedPluginId = pf4jManager.loadPlugin(jarPath);
             pf4jManager.startPlugin(loadedPluginId);
 
             PluginWrapper wrapper = pf4jManager.getPlugin(loadedPluginId);
             loadedPlugins.put(pluginId, wrapper);
+
+            // Auto-register controllers from plugin's ApplicationContext
+            DefaultPluginContext pluginContext = pluginFactory.getPluginContexts().get(pluginId);
+            if (pluginContext != null) {
+                pluginContext.autoRegisterControllers();
+            }
+
             log.info("Plugin loaded and started: {}", pluginId);
 
         } catch (Exception e) {
@@ -178,6 +183,14 @@ public class TenantPluginManager {
         }
 
         try {
+            // Unregister controllers and close AC before stopping PF4J
+            DefaultPluginContext pluginContext = pluginFactory.getPluginContexts().get(pluginId);
+            if (pluginContext != null) {
+                pluginContext.unregisterAllControllers();
+                pluginContext.close();
+                pluginFactory.getPluginContexts().remove(pluginId);
+            }
+
             pf4jManager.stopPlugin(pluginId);
             pf4jManager.unloadPlugin(pluginId);
             loadedPlugins.remove(pluginId);

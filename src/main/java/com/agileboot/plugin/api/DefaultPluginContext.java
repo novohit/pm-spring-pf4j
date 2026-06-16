@@ -5,6 +5,14 @@ import com.agileboot.plugin.event.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -12,24 +20,19 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 默认插件上下文实现
- */
 public class DefaultPluginContext implements PluginContext {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultPluginContext.class);
 
     private final String pluginId;
-    private final ApplicationContext applicationContext;
+    private final ApplicationContext pluginApplicationContext;
     private final TenantPluginConfig.PluginInstanceConfig pluginConfig;
-
-    // 跟踪已注册的Controller和映射
     private final Map<Object, List<RequestMappingInfo>> registeredMappings = new ConcurrentHashMap<>();
 
-    public DefaultPluginContext(String pluginId, ApplicationContext applicationContext,
+    public DefaultPluginContext(String pluginId, ApplicationContext pluginApplicationContext,
                                 TenantPluginConfig.PluginInstanceConfig pluginConfig) {
         this.pluginId = pluginId;
-        this.applicationContext = applicationContext;
+        this.pluginApplicationContext = pluginApplicationContext;
         this.pluginConfig = pluginConfig != null ? pluginConfig : new TenantPluginConfig.PluginInstanceConfig();
     }
 
@@ -40,13 +43,14 @@ public class DefaultPluginContext implements PluginContext {
 
     @Override
     public ApplicationContext getApplicationContext() {
-        return applicationContext;
+        return pluginApplicationContext;
     }
 
     @Override
     public <T> T getService(Class<T> serviceClass) {
         try {
-            return applicationContext.getBean(serviceClass);
+            // Plugin AC first (parent lookup is automatic via Spring)
+            return pluginApplicationContext.getBean(serviceClass);
         } catch (Exception e) {
             log.warn("[{}] 无法获取服务: {} - {}", pluginId, serviceClass.getSimpleName(), e.getMessage());
             return null;
@@ -60,7 +64,7 @@ public class DefaultPluginContext implements PluginContext {
 
     @Override
     public void publishEvent(Object event) {
-        EventBus eventBus = applicationContext.getBean(EventBus.class);
+        EventBus eventBus = pluginApplicationContext.getBean(EventBus.class);
         if (eventBus != null) {
             eventBus.publish(event);
         }
@@ -68,20 +72,40 @@ public class DefaultPluginContext implements PluginContext {
 
     @Override
     public <T> void subscribeEvent(Class<T> eventType, EventBus.EventListener<T> listener) {
-        EventBus eventBus = applicationContext.getBean(EventBus.class);
+        EventBus eventBus = pluginApplicationContext.getBean(EventBus.class);
         eventBus.subscribe(eventType, listener);
     }
 
     @Override
     public <T> void subscribeEvent(Class<T> eventType, EventBus.EventListener<T> listener, String tenantId) {
-        EventBus eventBus = applicationContext.getBean(EventBus.class);
+        EventBus eventBus = pluginApplicationContext.getBean(EventBus.class);
         eventBus.subscribe(eventType, listener, tenantId);
     }
 
     @Override
     public <T> void unsubscribeEvent(Class<T> eventType, EventBus.EventListener<T> listener) {
-        EventBus eventBus = applicationContext.getBean(EventBus.class);
+        EventBus eventBus = pluginApplicationContext.getBean(EventBus.class);
         eventBus.unsubscribe(eventType, listener);
+    }
+
+    /**
+     * Auto-register all @RestController/@Controller beans from plugin AC into host MVC.
+     * Called by the framework after plugin AC is refreshed.
+     */
+    public void autoRegisterControllers() {
+        Set<Object> controllers = new HashSet<>();
+        Map<String, Object> restControllers = pluginApplicationContext.getBeansWithAnnotation(RestController.class);
+        Map<String, Object> controllers_ = pluginApplicationContext.getBeansWithAnnotation(Controller.class);
+        controllers.addAll(restControllers.values());
+        controllers.addAll(controllers_.values());
+
+        for (Object controller : controllers) {
+            registerController(controller);
+        }
+
+        if (!controllers.isEmpty()) {
+            log.info("[{}] 自动注册{}个Controller", pluginId, controllers.size());
+        }
     }
 
     @Override
@@ -94,32 +118,25 @@ public class DefaultPluginContext implements PluginContext {
             }
 
             Class<?> controllerClass = controller.getClass();
-            if (!controllerClass.isAnnotationPresent(org.springframework.web.bind.annotation.RestController.class) &&
-                    !controllerClass.isAnnotationPresent(org.springframework.stereotype.Controller.class)) {
+            if (!controllerClass.isAnnotationPresent(RestController.class) &&
+                    !controllerClass.isAnnotationPresent(Controller.class)) {
                 log.warn("[{}] Controller没有@RestController或@Controller注解", pluginId);
                 return;
             }
 
-            // 获取类级别路径前缀
-            org.springframework.web.bind.annotation.RequestMapping classMapping =
-                    controllerClass.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+            RequestMapping classMapping = controllerClass.getAnnotation(RequestMapping.class);
             String[] basePath = classMapping != null ? classMapping.value() : new String[]{""};
 
             List<RequestMappingInfo> mappings = new ArrayList<>();
 
-            // 遍历所有方法，逐个注册
             for (Method method : controllerClass.getDeclaredMethods()) {
                 String[] paths = null;
                 org.springframework.web.bind.annotation.RequestMethod[] methods = null;
 
-                org.springframework.web.bind.annotation.GetMapping getMapping =
-                        method.getAnnotation(org.springframework.web.bind.annotation.GetMapping.class);
-                org.springframework.web.bind.annotation.PostMapping postMapping =
-                        method.getAnnotation(org.springframework.web.bind.annotation.PostMapping.class);
-                org.springframework.web.bind.annotation.PutMapping putMapping =
-                        method.getAnnotation(org.springframework.web.bind.annotation.PutMapping.class);
-                org.springframework.web.bind.annotation.DeleteMapping deleteMapping =
-                        method.getAnnotation(org.springframework.web.bind.annotation.DeleteMapping.class);
+                GetMapping getMapping = method.getAnnotation(GetMapping.class);
+                PostMapping postMapping = method.getAnnotation(PostMapping.class);
+                PutMapping putMapping = method.getAnnotation(PutMapping.class);
+                DeleteMapping deleteMapping = method.getAnnotation(DeleteMapping.class);
 
                 if (getMapping != null) {
                     paths = getMapping.value();
@@ -160,7 +177,6 @@ public class DefaultPluginContext implements PluginContext {
                 }
             }
 
-            // 记录映射，用于后续卸载
             registeredMappings.put(controller, mappings);
             log.info("[{}] Controller注册成功: {} ({}个端点)", pluginId, controllerClass.getSimpleName(), mappings.size());
 
@@ -190,9 +206,6 @@ public class DefaultPluginContext implements PluginContext {
         }
     }
 
-    /**
-     * 注销所有Controller
-     */
     public void unregisterAllControllers() {
         for (Object controller : new ArrayList<>(registeredMappings.keySet())) {
             unregisterController(controller);
@@ -202,10 +215,28 @@ public class DefaultPluginContext implements PluginContext {
     @Override
     public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
         try {
-            return applicationContext.getBean(RequestMappingHandlerMapping.class);
+            // Get from parent (host) context
+            if (pluginApplicationContext.getParent() != null) {
+                return pluginApplicationContext.getParent().getBean(RequestMappingHandlerMapping.class);
+            }
+            return pluginApplicationContext.getBean(RequestMappingHandlerMapping.class);
         } catch (Exception e) {
             log.warn("[{}] 无法获取RequestMappingHandlerMapping: {}", pluginId, e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Close the plugin's ApplicationContext.
+     */
+    public void close() {
+        try {
+            if (pluginApplicationContext instanceof ConfigurableApplicationContext) {
+                ((ConfigurableApplicationContext) pluginApplicationContext).close();
+                log.info("[{}] 插件ApplicationContext已关闭", pluginId);
+            }
+        } catch (Exception e) {
+            log.error("[{}] 关闭ApplicationContext失败: {}", pluginId, e.getMessage(), e);
         }
     }
 }
