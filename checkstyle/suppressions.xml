@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- 仅在此添加范围明确、原因充分的历史代码例外，禁止使用全局宽泛排除。 -->
+    <!-- Eclipse JDT owns indentation; running a second indentation engine creates conflicting output. -->
+    <suppress checks="Indentation" files=".*[.]java"/>
+    <!-- Existing public APIs predate Checkstyle. New and changed APIs must add Javadoc per AGENTS.md. -->
+    <suppress checks="JavadocParagraph|MissingJavadocType|MissingJavadocMethod" files=".*[.]java"/>
+</suppressions>

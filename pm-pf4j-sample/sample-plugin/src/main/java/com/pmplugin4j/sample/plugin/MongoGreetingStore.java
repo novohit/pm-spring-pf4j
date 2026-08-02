@@ -19,5 +19,6 @@ public class MongoGreetingStore {
     }
 
     @Document("plugin_greetings")
-    public record GreetingDocument(@Id String id, String message) {}
+    public record GreetingDocument(@Id String id, String message) {
+    }
 }

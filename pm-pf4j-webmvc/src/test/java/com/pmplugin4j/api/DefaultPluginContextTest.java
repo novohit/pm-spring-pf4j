@@ -23,9 +23,7 @@ class DefaultPluginContextTest {
             host.refresh();
             plugin.setParent(host);
             plugin.refresh();
-            DefaultPluginContext context = new DefaultPluginContext(
-                    "com.example.plugin",
-                    plugin,
+            DefaultPluginContext context = new DefaultPluginContext("com.example.plugin", plugin,
                     new TenantPluginConfig.PluginInstanceConfig());
             SampleController controller = new SampleController();
             context.registerController(controller);
@@ -50,8 +48,7 @@ class DefaultPluginContextTest {
         int unregistrations;
 
         @Override
-        public void registerMapping(
-                RequestMappingInfo mapping, Object handler, Method method) {
+        public void registerMapping(RequestMappingInfo mapping, Object handler, Method method) {
             registrations++;
         }
 

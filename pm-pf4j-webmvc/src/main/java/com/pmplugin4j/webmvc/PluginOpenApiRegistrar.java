@@ -14,9 +14,7 @@ public final class PluginOpenApiRegistrar implements BuiltInPluginResourceRegist
 
     @Override
     public Set<PluginLifecyclePhase> phases() {
-        return Set.of(
-                PluginLifecyclePhase.AFTER_CONTEXT_REFRESH,
-                PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE);
+        return Set.of(PluginLifecyclePhase.AFTER_CONTEXT_REFRESH, PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE);
     }
 
     @Override
@@ -30,14 +28,12 @@ public final class PluginOpenApiRegistrar implements BuiltInPluginResourceRegist
         controllers.addAll(pluginContext.getBeansWithAnnotation(Controller.class).values());
         controllers.addAll(pluginContext.getBeansWithAnnotation(RestController.class).values());
         if (!controllers.isEmpty()) {
-            PluginOpenApiConfig.registerPluginOpenApi(
-                    pluginContext.getParent(), pluginContext.getId(), controllers);
+            PluginOpenApiConfig.registerPluginOpenApi(pluginContext.getParent(), pluginContext.getId(), controllers);
         }
     }
 
     @Override
     public void onBeforeContextClose(AnnotationConfigApplicationContext pluginContext) {
-        PluginOpenApiConfig.unregisterPluginOpenApi(
-                pluginContext.getParent(), pluginContext.getId());
+        PluginOpenApiConfig.unregisterPluginOpenApi(pluginContext.getParent(), pluginContext.getId());
     }
 }

@@ -1,10 +1,13 @@
 package com.pmplugin4j.registry;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 默认SPI注册表实现
@@ -28,8 +31,8 @@ public class DefaultSpiRegistry implements SpiRegistry {
         extensions.computeIfAbsent(key, k -> new ConcurrentHashMap<>())
             .put(tenantKey, new ExtensionEntry<>(implementation, priority, tenantId));
 
-        log.debug("Registered extension: {} for tenant: {} with priority: {}",
-            extensionType.getSimpleName(), tenantKey, priority);
+        log.debug("Registered extension: {} for tenant: {} with priority: {}", extensionType.getSimpleName(), tenantKey,
+                priority);
     }
 
     @Override

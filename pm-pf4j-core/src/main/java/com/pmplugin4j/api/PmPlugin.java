@@ -20,8 +20,7 @@ public abstract class PmPlugin {
     protected abstract AnnotationConfigApplicationContext beforeApplicationContextRefresh(
             AnnotationConfigApplicationContext context);
 
-    protected abstract void afterApplicationContextReady(
-            AnnotationConfigApplicationContext context);
+    protected abstract void afterApplicationContextReady(AnnotationConfigApplicationContext context);
 
     public final void attachPluginContext(PluginContext pluginContext) {
         this.pluginContext = pluginContext;

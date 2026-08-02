@@ -1,14 +1,18 @@
 package com.pmplugin4j.openapi;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.api.AbstractOpenApiResource;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-
-import java.lang.reflect.Field;
-import java.util.*;
 
 public class PluginOpenApiConfig {
 
@@ -19,9 +23,10 @@ public class PluginOpenApiConfig {
     /**
      * 为插件注册 OpenAPI 分组，使 springdoc 能扫描到插件的 Controller。
      */
-    public static void registerPluginOpenApi(ApplicationContext hostCtx, String pluginId,
-                                              Set<Object> controllers) {
-        if (controllers.isEmpty()) return;
+    public static void registerPluginOpenApi(ApplicationContext hostCtx, String pluginId, Set<Object> controllers) {
+        if (controllers.isEmpty()) {
+            return;
+        }
 
         try {
             String groupName = pluginId.trim().toLowerCase();
@@ -38,10 +43,10 @@ public class PluginOpenApiConfig {
 
             // 1. 创建 GroupedOpenApi bean
             GroupedOpenApi groupedOpenApi = GroupedOpenApi.builder()
-                    .group(groupName)
-                    .displayName(pluginId)
-                    .packagesToScan(packages.toArray(new String[0]))
-                    .build();
+                .group(groupName)
+                .displayName(pluginId)
+                .packagesToScan(packages.toArray(new String[0]))
+                .build();
 
             GenericApplicationContext ctx = (GenericApplicationContext) hostCtx;
             if (!ctx.containsBeanDefinition(beanName)) {
@@ -74,7 +79,9 @@ public class PluginOpenApiConfig {
     public static void unregisterPluginOpenApi(ApplicationContext hostCtx, String pluginId) {
         try {
             List<Class<?>> controllerClasses = PLUGIN_CONTROLLER_CLASSES.remove(pluginId);
-            if (controllerClasses == null) return;
+            if (controllerClasses == null) {
+                return;
+            }
 
             // 从 ADDITIONAL_REST_CONTROLLERS 移除
             Field field = AbstractOpenApiResource.class.getDeclaredField("ADDITIONAL_REST_CONTROLLERS");
@@ -109,14 +116,20 @@ public class PluginOpenApiConfig {
         try {
             Class<?> mvcClass = Class.forName("org.springdoc.webmvc.api.MultipleOpenApiResource");
             Map<String, ?> beans = ctx.getBeansOfType(mvcClass);
-            if (!beans.isEmpty()) return beans.values().iterator().next();
+            if (!beans.isEmpty()) {
+                return beans.values().iterator().next();
+            }
         } catch (ClassNotFoundException ignored) {
+            // Spring MVC OpenAPI support is optional.
         }
         try {
             Class<?> webfluxClass = Class.forName("org.springdoc.webflux.api.MultipleOpenApiResource");
             Map<String, ?> beans = ctx.getBeansOfType(webfluxClass);
-            if (!beans.isEmpty()) return beans.values().iterator().next();
+            if (!beans.isEmpty()) {
+                return beans.values().iterator().next();
+            }
         } catch (ClassNotFoundException ignored) {
+            // Spring WebFlux OpenAPI support is optional.
         }
         return null;
     }

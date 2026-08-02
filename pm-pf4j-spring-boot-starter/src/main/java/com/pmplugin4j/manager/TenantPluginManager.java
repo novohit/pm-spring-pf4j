@@ -4,6 +4,21 @@ import com.pmplugin4j.config.PluginProperties;
 import com.pmplugin4j.config.TenantPluginConfig;
 import com.pmplugin4j.factory.PmPluginFactory;
 import com.pmplugin4j.lifecycle.PluginResourceRegistrar;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
@@ -13,14 +28,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 
 /**
  * 租户级别插件管理器
@@ -70,8 +77,7 @@ public class TenantPluginManager {
 
         // 创建PF4J PluginManager，使用自定义PluginFactory
         registrarsFrozen = true;
-        pluginFactory = new PmPluginFactory(
-                applicationContext, pluginProperties, List.copyOf(externalRegistrars));
+        pluginFactory = new PmPluginFactory(applicationContext, pluginProperties, List.copyOf(externalRegistrars));
         PmJarPluginManager.setPendingFactory(pluginFactory);
         pf4jManager = new PmJarPluginManager(pluginFactory);
 

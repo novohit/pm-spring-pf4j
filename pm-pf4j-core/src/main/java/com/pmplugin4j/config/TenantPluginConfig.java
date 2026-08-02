@@ -7,8 +7,7 @@ import java.util.Map;
 /**
  * 租户-插件映射配置
  *
- * 职责：定义哪些租户使用哪些插件，以及每个插件的运行时配置
- * 配置来源：application-plugin.yml 或 数据库
+ * 职责：定义哪些租户使用哪些插件，以及每个插件的运行时配置 配置来源：application-plugin.yml 或 数据库
  */
 public class TenantPluginConfig {
 
@@ -29,20 +28,45 @@ public class TenantPluginConfig {
 
     // ========== getters/setters ==========
 
-    public String getTenantId() { return tenantId; }
-    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+    public String getTenantId() {
+        return tenantId;
+    }
 
-    public String getTenantName() { return tenantName; }
-    public void setTenantName(String tenantName) { this.tenantName = tenantName; }
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
 
-    public String getProfile() { return profile; }
-    public void setProfile(String profile) { this.profile = profile; }
+    public String getTenantName() {
+        return tenantName;
+    }
 
-    public List<String> getEnabledPlugins() { return enabledPlugins; }
-    public void setEnabledPlugins(List<String> enabledPlugins) { this.enabledPlugins = enabledPlugins; }
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
+    }
 
-    public Map<String, PluginInstanceConfig> getPluginConfigs() { return pluginConfigs; }
-    public void setPluginConfigs(Map<String, PluginInstanceConfig> pluginConfigs) { this.pluginConfigs = pluginConfigs; }
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
+    }
+
+    public List<String> getEnabledPlugins() {
+        return enabledPlugins;
+    }
+
+    public void setEnabledPlugins(List<String> enabledPlugins) {
+        this.enabledPlugins = enabledPlugins;
+    }
+
+    public Map<String, PluginInstanceConfig> getPluginConfigs() {
+        return pluginConfigs;
+    }
+
+    public void setPluginConfigs(Map<String, PluginInstanceConfig> pluginConfigs) {
+        this.pluginConfigs = pluginConfigs;
+    }
 
     /**
      * 检查指定插件是否在此租户中启用
@@ -68,14 +92,32 @@ public class TenantPluginConfig {
         /** 自定义配置项 */
         private Map<String, Object> properties = new HashMap<>();
 
-        public boolean isEnabled() { return enabled; }
-        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public boolean isEnabled() {
+            return enabled;
+        }
 
-        public Map<String, Object> getProperties() { return properties; }
-        public void setProperties(Map<String, Object> properties) { this.properties = properties; }
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
 
-        public Object get(String key) { return properties.get(key); }
-        public Object get(String key, Object defaultValue) { return properties.getOrDefault(key, defaultValue); }
-        public void set(String key, Object value) { properties.put(key, value); }
+        public Map<String, Object> getProperties() {
+            return properties;
+        }
+
+        public void setProperties(Map<String, Object> properties) {
+            this.properties = properties;
+        }
+
+        public Object get(String key) {
+            return properties.get(key);
+        }
+
+        public Object get(String key, Object defaultValue) {
+            return properties.getOrDefault(key, defaultValue);
+        }
+
+        public void set(String key, Object value) {
+            properties.put(key, value);
+        }
     }
 }

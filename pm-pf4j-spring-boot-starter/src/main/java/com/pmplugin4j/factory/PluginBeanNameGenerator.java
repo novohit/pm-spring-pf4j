@@ -1,10 +1,9 @@
 package com.pmplugin4j.factory;
 
+import java.beans.Introspector;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
-
-import java.beans.Introspector;
 
 public class PluginBeanNameGenerator extends AnnotationBeanNameGenerator {
 

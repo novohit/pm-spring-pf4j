@@ -19,4 +19,5 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - run: mvn --batch-mode --no-transfer-progress clean verify
+      - name: Verify formatting, style, and tests
+        run: mvn --batch-mode --no-transfer-progress clean verify

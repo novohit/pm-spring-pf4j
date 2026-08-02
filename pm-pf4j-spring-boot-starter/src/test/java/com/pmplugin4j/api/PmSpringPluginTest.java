@@ -1,8 +1,8 @@
 package com.pmplugin4j.api;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.pf4j.PluginDescriptor;
-import org.pf4j.PluginWrapper;
 import org.pf4j.PluginRuntimeException;
+import org.pf4j.PluginWrapper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -37,8 +37,7 @@ class PmSpringPluginTest {
     void rejectsPluginIdThatDoesNotMatchBusinessPluginPackage() {
         try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
             host.refresh();
-            PmSpringPlugin plugin =
-                    plugin(wrapper("wrong.plugin.id"), new TestBusinessPlugin(), host, List.of());
+            PmSpringPlugin plugin = plugin(wrapper("wrong.plugin.id"), new TestBusinessPlugin(), host, List.of());
 
             assertThrows(PluginRuntimeException.class, plugin::start);
         }
@@ -66,13 +65,8 @@ class PmSpringPluginTest {
 
         try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
             host.refresh();
-            PmSpringPlugin plugin = new com.pmplugin4j.api.PmSpringPlugin(
-                    wrapper,
-                    businessPlugin,
-                    host,
-                    new PluginProperties(),
-                    List.of(),
-                    List.of(registrar));
+            PmSpringPlugin plugin = new com.pmplugin4j.api.PmSpringPlugin(wrapper, businessPlugin, host,
+                    new PluginProperties(), List.of(), List.of(registrar));
 
             plugin.start();
             ApplicationContext first = plugin.getApplicationContext();
@@ -104,27 +98,16 @@ class PmSpringPluginTest {
         return wrapper;
     }
 
-    private static PmSpringPlugin plugin(
-            PluginWrapper wrapper,
-            PmPlugin businessPlugin,
-            ApplicationContext host,
+    private static PmSpringPlugin plugin(PluginWrapper wrapper, PmPlugin businessPlugin, ApplicationContext host,
             List<PluginResourceRegistrar> registrars) {
-        return new PmSpringPlugin(
-                wrapper,
-                businessPlugin,
-                host,
-                new PluginProperties(),
-                List.of(),
-                registrars);
+        return new PmSpringPlugin(wrapper, businessPlugin, host, new PluginProperties(), List.of(), registrars);
     }
 
     private static PluginResourceRegistrar registrar(List<String> calls) {
         return new PluginResourceRegistrar() {
             @Override
             public Set<PluginLifecyclePhase> phases() {
-                return Set.of(
-                        PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH,
-                        PluginLifecyclePhase.AFTER_CONTEXT_REFRESH,
+                return Set.of(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, PluginLifecyclePhase.AFTER_CONTEXT_REFRESH,
                         PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE);
             }
 

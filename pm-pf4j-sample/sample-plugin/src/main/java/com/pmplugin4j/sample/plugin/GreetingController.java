@@ -1,8 +1,8 @@
 package com.pmplugin4j.sample.plugin;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,8 +22,7 @@ public class GreetingController {
     }
 
     @PostMapping("/mongo-greetings")
-    public MongoGreetingStore.GreetingDocument saveMongoGreeting(
-            @RequestParam String message) {
+    public MongoGreetingStore.GreetingDocument saveMongoGreeting(@RequestParam String message) {
         return mongoGreetingStore.save(message);
     }
 }

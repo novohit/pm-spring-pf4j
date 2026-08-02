@@ -5,8 +5,8 @@ import com.pmplugin4j.api.PmSpringPlugin;
 import com.pmplugin4j.config.PluginProperties;
 import com.pmplugin4j.lifecycle.PluginResourceRegistrar;
 import com.pmplugin4j.mybatis.PluginMybatisRegistrar;
-import com.pmplugin4j.webmvc.PluginWebMvcRegistrar;
 import com.pmplugin4j.webmvc.PluginOpenApiRegistrar;
+import com.pmplugin4j.webmvc.PluginWebMvcRegistrar;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -22,9 +22,7 @@ public final class PmPluginFactory implements PluginFactory {
     private final PluginProperties pluginProperties;
     private final List<PluginResourceRegistrar> programmaticRegistrars;
 
-    public PmPluginFactory(
-            ApplicationContext hostApplicationContext,
-            PluginProperties pluginProperties,
+    public PmPluginFactory(ApplicationContext hostApplicationContext, PluginProperties pluginProperties,
             List<PluginResourceRegistrar> programmaticRegistrars) {
         this.hostApplicationContext = hostApplicationContext;
         this.pluginProperties = pluginProperties;
@@ -34,29 +32,19 @@ public final class PmPluginFactory implements PluginFactory {
     @Override
     public Plugin create(PluginWrapper wrapper) {
         try {
-            Class<?> pluginClass = wrapper.getPluginClassLoader()
-                    .loadClass(wrapper.getDescriptor().getPluginClass());
+            Class<?> pluginClass = wrapper.getPluginClassLoader().loadClass(wrapper.getDescriptor().getPluginClass());
             int modifiers = pluginClass.getModifiers();
-            if (Modifier.isAbstract(modifiers)
-                    || Modifier.isInterface(modifiers)
+            if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)
                     || !PmPlugin.class.isAssignableFrom(pluginClass)) {
                 throw new IllegalArgumentException(
                         "Plugin class must be a concrete PmPlugin: " + pluginClass.getName());
             }
             PmPlugin businessPlugin = instantiate(pluginClass, wrapper);
-            return new PmSpringPlugin(
-                    wrapper,
-                    businessPlugin,
-                    hostApplicationContext,
-                    pluginProperties,
-                    List.of(
-                            new PluginMybatisRegistrar(),
-                            new PluginWebMvcRegistrar(),
-                            new PluginOpenApiRegistrar()),
+            return new PmSpringPlugin(wrapper, businessPlugin, hostApplicationContext, pluginProperties,
+                    List.of(new PluginMybatisRegistrar(), new PluginWebMvcRegistrar(), new PluginOpenApiRegistrar()),
                     programmaticRegistrars);
         } catch (Exception exception) {
-            throw new IllegalStateException(
-                    "Failed to instantiate plugin " + wrapper.getPluginId(), exception);
+            throw new IllegalStateException("Failed to instantiate plugin " + wrapper.getPluginId(), exception);
         }
     }
 

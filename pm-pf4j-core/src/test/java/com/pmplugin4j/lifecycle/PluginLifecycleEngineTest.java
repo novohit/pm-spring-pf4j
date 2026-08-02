@@ -16,10 +16,8 @@ class PluginLifecycleEngineTest {
         List<String> calls = new ArrayList<>();
         try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
             host.refresh();
-            PluginLifecycleEngine engine = PluginLifecycleEngine.create(
-                    host,
-                    List.of(registrar("second", 20, calls), registrar("first", 10, calls)),
-                    List.of());
+            PluginLifecycleEngine engine = PluginLifecycleEngine.create(host,
+                    List.of(registrar("second", 20, calls), registrar("first", 10, calls)), List.of());
             AnnotationConfigApplicationContext plugin = new AnnotationConfigApplicationContext();
 
             engine.executePhase(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, plugin);
@@ -47,11 +45,8 @@ class PluginLifecycleEngineTest {
         };
         try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
             host.refresh();
-            PluginLifecycleEngine engine =
-                    PluginLifecycleEngine.create(host, List.of(), List.of(failing));
-            engine.executePhase(
-                    PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH,
-                    new AnnotationConfigApplicationContext());
+            PluginLifecycleEngine engine = PluginLifecycleEngine.create(host, List.of(), List.of(failing));
+            engine.executePhase(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, new AnnotationConfigApplicationContext());
         }
         assertEquals(List.of("external"), calls);
     }
@@ -71,13 +66,9 @@ class PluginLifecycleEngineTest {
         };
         try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
             host.refresh();
-            PluginLifecycleEngine engine =
-                    PluginLifecycleEngine.create(host, List.of(failing), List.of());
-            assertThrows(
-                    IllegalStateException.class,
-                    () -> engine.executePhase(
-                            PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH,
-                            new AnnotationConfigApplicationContext()));
+            PluginLifecycleEngine engine = PluginLifecycleEngine.create(host, List.of(failing), List.of());
+            assertThrows(IllegalStateException.class, () -> engine
+                .executePhase(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, new AnnotationConfigApplicationContext()));
         }
     }
 
@@ -85,9 +76,7 @@ class PluginLifecycleEngineTest {
         return new PluginResourceRegistrar() {
             @Override
             public Set<PluginLifecyclePhase> phases() {
-                return Set.of(
-                        PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH,
-                        PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE);
+                return Set.of(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE);
             }
 
             @Override

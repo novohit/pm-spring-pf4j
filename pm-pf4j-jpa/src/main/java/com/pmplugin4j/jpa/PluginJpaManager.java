@@ -20,42 +20,34 @@ public final class PluginJpaManager {
     private final PluginJpaProperties properties;
     private final Set<String> initializedPlugins = ConcurrentHashMap.newKeySet();
 
-    public PluginJpaManager(
-            DataSource dataSource,
-            JpaVendorAdapter vendorAdapter,
-            PluginJpaProperties properties) {
+    public PluginJpaManager(DataSource dataSource, JpaVendorAdapter vendorAdapter, PluginJpaProperties properties) {
         this.dataSource = dataSource;
         this.vendorAdapter = vendorAdapter;
         this.properties = properties;
     }
 
-    public void initialize(
-            String pluginId,
-            String entityPackage,
-            AnnotationConfigApplicationContext pluginContext) {
+    public void initialize(String pluginId, String entityPackage, AnnotationConfigApplicationContext pluginContext) {
         if (!initializedPlugins.add(pluginId)) {
             return;
         }
         try {
-            DefaultListableBeanFactory beans = pluginContext.getDefaultListableBeanFactory();
-            String emfName = pluginId + "_entityManagerFactory";
-            BeanDefinitionBuilder emf =
-                    BeanDefinitionBuilder.genericBeanDefinition(
-                            LocalContainerEntityManagerFactoryBean.class);
+            final DefaultListableBeanFactory beans = pluginContext.getDefaultListableBeanFactory();
+            final String emfName = pluginId + "_entityManagerFactory";
+            BeanDefinitionBuilder emf = BeanDefinitionBuilder
+                .genericBeanDefinition(LocalContainerEntityManagerFactoryBean.class);
             emf.addPropertyValue("dataSource", dataSource);
-            emf.addPropertyValue("packagesToScan", new String[] {entityPackage});
+            emf.addPropertyValue("packagesToScan", new String[]{entityPackage});
             emf.addPropertyValue("jpaVendorAdapter", vendorAdapter);
             emf.addPropertyValue("jpaPropertyMap", properties.asJpaProperties());
             emf.addPropertyValue("persistenceUnitName", pluginId);
             emf.setPrimary(true);
             beans.registerBeanDefinition(emfName, emf.getBeanDefinition());
 
-            BeanDefinitionBuilder transactionManager =
-                    BeanDefinitionBuilder.genericBeanDefinition(JpaTransactionManager.class);
+            BeanDefinitionBuilder transactionManager = BeanDefinitionBuilder
+                .genericBeanDefinition(JpaTransactionManager.class);
             transactionManager.addPropertyReference("entityManagerFactory", emfName);
             transactionManager.setPrimary(true);
-            beans.registerBeanDefinition(
-                    pluginId + "_transactionManager", transactionManager.getBeanDefinition());
+            beans.registerBeanDefinition(pluginId + "_transactionManager", transactionManager.getBeanDefinition());
         } catch (RuntimeException exception) {
             initializedPlugins.remove(pluginId);
             throw exception;
@@ -68,8 +60,7 @@ public final class PluginJpaManager {
         if (!pluginContext.containsBean(emfName)) {
             return;
         }
-        EntityManagerFactory entityManagerFactory =
-                pluginContext.getBean(emfName, EntityManagerFactory.class);
+        EntityManagerFactory entityManagerFactory = pluginContext.getBean(emfName, EntityManagerFactory.class);
         if (entityManagerFactory.isOpen()) {
             entityManagerFactory.close();
         }

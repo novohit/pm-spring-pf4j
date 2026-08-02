@@ -19,8 +19,8 @@ class PluginMybatisRegistrarTest {
     @Test
     void registersPluginOwnedTemplateAndMapperScanner() {
         SqlSessionFactory sessionFactory = mock(SqlSessionFactory.class);
-        Configuration configuration = new Configuration(new Environment(
-                "test", new JdbcTransactionFactory(), mock(DataSource.class)));
+        Configuration configuration = new Configuration(
+                new Environment("test", new JdbcTransactionFactory(), mock(DataSource.class)));
         when(sessionFactory.getConfiguration()).thenReturn(configuration);
         try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext();
                 AnnotationConfigApplicationContext plugin = new AnnotationConfigApplicationContext()) {
@@ -28,8 +28,9 @@ class PluginMybatisRegistrarTest {
             host.refresh();
             plugin.setId("com.example.plugin");
             plugin.setParent(host);
-            plugin.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
-                    "plugin", Map.of("pm.plugin.base-package", "com.example.plugin")));
+            plugin.getEnvironment()
+                .getPropertySources()
+                .addFirst(new MapPropertySource("plugin", Map.of("pm.plugin.base-package", "com.example.plugin")));
 
             new PluginMybatisRegistrar().onBeforeContextRefresh(plugin);
 

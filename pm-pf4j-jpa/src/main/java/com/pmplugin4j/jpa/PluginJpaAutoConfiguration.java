@@ -25,9 +25,7 @@ public class PluginJpaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    PluginJpaManager pluginJpaManager(
-            DataSource dataSource,
-            JpaVendorAdapter vendorAdapter,
+    PluginJpaManager pluginJpaManager(DataSource dataSource, JpaVendorAdapter vendorAdapter,
             PluginJpaProperties properties) {
         return new PluginJpaManager(dataSource, vendorAdapter, properties);
     }

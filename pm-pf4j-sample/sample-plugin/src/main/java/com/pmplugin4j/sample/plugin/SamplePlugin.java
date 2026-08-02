@@ -17,5 +17,6 @@ public class SamplePlugin extends PmPlugin {
     }
 
     @Override
-    protected void afterApplicationContextReady(AnnotationConfigApplicationContext context) {}
+    protected void afterApplicationContextReady(AnnotationConfigApplicationContext context) {
+    }
 }

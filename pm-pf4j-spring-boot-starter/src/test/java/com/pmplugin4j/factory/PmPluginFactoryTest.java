@@ -54,6 +54,7 @@ class PmPluginFactoryTest {
         }
 
         @Override
-        protected void afterApplicationContextReady(AnnotationConfigApplicationContext context) {}
+        protected void afterApplicationContextReady(AnnotationConfigApplicationContext context) {
+        }
     }
 }

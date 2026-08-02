@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "Running reactor-wide Spotless and Checkstyle checks..."
+
+mvn -q validate
+status=$?
+
+if [ "$status" -ne 0 ]; then
+    echo
+    echo "Java code style check failed."
+    echo "Run 'mvn -pl <module> spotless:apply' for each affected module, then resolve remaining Checkstyle violations."
+    exit "$status"
+fi
+
+exit 0

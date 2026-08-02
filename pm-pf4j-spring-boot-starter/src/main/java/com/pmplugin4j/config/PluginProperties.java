@@ -1,17 +1,15 @@
 package com.pmplugin4j.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * 插件框架配置属性
  *
- * 配置来源：application-plugin.yml
- * 职责：管理租户-插件映射和全局插件配置
+ * 配置来源：application-plugin.yml 职责：管理租户-插件映射和全局插件配置
  */
 @ConfigurationProperties(prefix = "agileboot.plugin")
 public class PluginProperties {
@@ -39,32 +37,66 @@ public class PluginProperties {
 
     // ========== getters/setters ==========
 
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-    public String getDirectory() { return directory; }
-    public void setDirectory(String directory) { this.directory = directory; }
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
-    public String getCurrentTenant() { return currentTenant; }
-    public void setCurrentTenant(String currentTenant) { this.currentTenant = currentTenant; }
+    public String getDirectory() {
+        return directory;
+    }
 
-    public boolean isAllowRuntimeInstall() { return allowRuntimeInstall; }
-    public void setAllowRuntimeInstall(boolean allowRuntimeInstall) { this.allowRuntimeInstall = allowRuntimeInstall; }
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
 
-    public boolean isAllowRuntimeUninstall() { return allowRuntimeUninstall; }
-    public void setAllowRuntimeUninstall(boolean allowRuntimeUninstall) { this.allowRuntimeUninstall = allowRuntimeUninstall; }
+    public String getCurrentTenant() {
+        return currentTenant;
+    }
 
-    public Map<String, List<String>> getProfiles() { return profiles; }
-    public void setProfiles(Map<String, List<String>> profiles) { this.profiles = profiles; }
+    public void setCurrentTenant(String currentTenant) {
+        this.currentTenant = currentTenant;
+    }
 
-    public Map<String, TenantPluginConfig> getTenants() { return tenants; }
-    public void setTenants(Map<String, TenantPluginConfig> tenants) { this.tenants = tenants; }
+    public boolean isAllowRuntimeInstall() {
+        return allowRuntimeInstall;
+    }
+
+    public void setAllowRuntimeInstall(boolean allowRuntimeInstall) {
+        this.allowRuntimeInstall = allowRuntimeInstall;
+    }
+
+    public boolean isAllowRuntimeUninstall() {
+        return allowRuntimeUninstall;
+    }
+
+    public void setAllowRuntimeUninstall(boolean allowRuntimeUninstall) {
+        this.allowRuntimeUninstall = allowRuntimeUninstall;
+    }
+
+    public Map<String, List<String>> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(Map<String, List<String>> profiles) {
+        this.profiles = profiles;
+    }
+
+    public Map<String, TenantPluginConfig> getTenants() {
+        return tenants;
+    }
+
+    public void setTenants(Map<String, TenantPluginConfig> tenants) {
+        this.tenants = tenants;
+    }
 
     // ========== 便捷方法 ==========
 
     /**
-     * 获取当前租户的启用插件列表
-     * 优先从租户配置获取，如果没有则从profile获取
+     * 获取当前租户的启用插件列表 优先从租户配置获取，如果没有则从profile获取
      */
     public List<String> getEnabledPlugins() {
         if (currentTenant == null) {

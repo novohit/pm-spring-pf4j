@@ -20,8 +20,8 @@ public interface EventBus {
      * 订阅事件
      *
      * @param eventType 事件类型
-     * @param listener 事件监听器
-     * @param <T> 事件类型
+     * @param listener  事件监听器
+     * @param <T>       事件类型
      */
     <T> void subscribe(Class<T> eventType, EventListener<T> listener);
 
@@ -29,9 +29,9 @@ public interface EventBus {
      * 订阅事件（带租户过滤）
      *
      * @param eventType 事件类型
-     * @param listener 事件监听器
-     * @param tenantId 租户ID（null表示所有租户）
-     * @param <T> 事件类型
+     * @param listener  事件监听器
+     * @param tenantId  租户ID（null表示所有租户）
+     * @param <T>       事件类型
      */
     <T> void subscribe(Class<T> eventType, EventListener<T> listener, String tenantId);
 
@@ -39,8 +39,8 @@ public interface EventBus {
      * 取消订阅
      *
      * @param eventType 事件类型
-     * @param listener 事件监听器
-     * @param <T> 事件类型
+     * @param listener  事件监听器
+     * @param <T>       事件类型
      */
     <T> void unsubscribe(Class<T> eventType, EventListener<T> listener);
 

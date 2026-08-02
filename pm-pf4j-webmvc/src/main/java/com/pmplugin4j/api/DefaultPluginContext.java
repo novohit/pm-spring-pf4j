@@ -2,23 +2,26 @@ package com.pmplugin4j.api;
 
 import com.pmplugin4j.config.TenantPluginConfig;
 import com.pmplugin4j.event.EventBus;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultPluginContext implements PluginContext {
 
@@ -30,7 +33,7 @@ public class DefaultPluginContext implements PluginContext {
     private final Map<Object, List<RequestMappingInfo>> registeredMappings = new ConcurrentHashMap<>();
 
     public DefaultPluginContext(String pluginId, ApplicationContext pluginApplicationContext,
-                                TenantPluginConfig.PluginInstanceConfig pluginConfig) {
+            TenantPluginConfig.PluginInstanceConfig pluginConfig) {
         this.pluginId = pluginId;
         this.pluginApplicationContext = pluginApplicationContext;
         this.pluginConfig = pluginConfig != null ? pluginConfig : new TenantPluginConfig.PluginInstanceConfig();
@@ -89,15 +92,15 @@ public class DefaultPluginContext implements PluginContext {
     }
 
     /**
-     * Auto-register all @RestController/@Controller beans from plugin AC into host MVC.
-     * Called by the framework after plugin AC is refreshed.
+     * Auto-register all @RestController/@Controller beans from plugin AC into host MVC. Called by the framework after
+     * plugin AC is refreshed.
      */
     public void autoRegisterControllers() {
         Set<Object> controllers = new HashSet<>();
         Map<String, Object> restControllers = pluginApplicationContext.getBeansWithAnnotation(RestController.class);
-        Map<String, Object> controllers_ = pluginApplicationContext.getBeansWithAnnotation(Controller.class);
+        Map<String, Object> annotatedControllers = pluginApplicationContext.getBeansWithAnnotation(Controller.class);
         controllers.addAll(restControllers.values());
-        controllers.addAll(controllers_.values());
+        controllers.addAll(annotatedControllers.values());
 
         for (Object controller : controllers) {
             registerController(controller);
@@ -118,8 +121,8 @@ public class DefaultPluginContext implements PluginContext {
             }
 
             Class<?> controllerClass = controller.getClass();
-            if (!controllerClass.isAnnotationPresent(RestController.class) &&
-                    !controllerClass.isAnnotationPresent(Controller.class)) {
+            if (!controllerClass.isAnnotationPresent(RestController.class)
+                    && !controllerClass.isAnnotationPresent(Controller.class)) {
                 log.warn("[{}] Controller没有@RestController或@Controller注解", pluginId);
                 return;
             }
@@ -141,38 +144,31 @@ public class DefaultPluginContext implements PluginContext {
                 if (getMapping != null) {
                     paths = getMapping.value();
                     methods = new org.springframework.web.bind.annotation.RequestMethod[]{
-                            org.springframework.web.bind.annotation.RequestMethod.GET
-                    };
+                            org.springframework.web.bind.annotation.RequestMethod.GET};
                 } else if (postMapping != null) {
                     paths = postMapping.value();
                     methods = new org.springframework.web.bind.annotation.RequestMethod[]{
-                            org.springframework.web.bind.annotation.RequestMethod.POST
-                    };
+                            org.springframework.web.bind.annotation.RequestMethod.POST};
                 } else if (putMapping != null) {
                     paths = putMapping.value();
                     methods = new org.springframework.web.bind.annotation.RequestMethod[]{
-                            org.springframework.web.bind.annotation.RequestMethod.PUT
-                    };
+                            org.springframework.web.bind.annotation.RequestMethod.PUT};
                 } else if (deleteMapping != null) {
                     paths = deleteMapping.value();
                     methods = new org.springframework.web.bind.annotation.RequestMethod[]{
-                            org.springframework.web.bind.annotation.RequestMethod.DELETE
-                    };
+                            org.springframework.web.bind.annotation.RequestMethod.DELETE};
                 }
 
                 if (paths != null) {
                     for (String path : paths) {
                         String fullPath = basePath[0] + path;
-                        RequestMappingInfo mappingInfo = RequestMappingInfo
-                                .paths(fullPath)
-                                .methods(methods)
-                                .build();
+                        RequestMappingInfo mappingInfo = RequestMappingInfo.paths(fullPath).methods(methods).build();
 
                         handlerMapping.registerMapping(mappingInfo, controller, method);
                         mappings.add(mappingInfo);
 
-                        log.info("[{}] 注册API端点: {} -> {}.{}",
-                                pluginId, fullPath, controllerClass.getSimpleName(), method.getName());
+                        log.info("[{}] 注册API端点: {} -> {}.{}", pluginId, fullPath, controllerClass.getSimpleName(),
+                                method.getName());
                     }
                 }
             }
@@ -181,8 +177,7 @@ public class DefaultPluginContext implements PluginContext {
             log.info("[{}] Controller注册成功: {} ({}个端点)", pluginId, controllerClass.getSimpleName(), mappings.size());
 
         } catch (Exception e) {
-            throw new IllegalStateException(
-                    "[" + pluginId + "] Controller registration failed", e);
+            throw new IllegalStateException("[" + pluginId + "] Controller registration failed", e);
         }
     }
 
@@ -199,12 +194,11 @@ public class DefaultPluginContext implements PluginContext {
                 for (RequestMappingInfo mapping : mappings) {
                     handlerMapping.unregisterMapping(mapping);
                 }
-                log.info("[{}] Controller注销成功: {} ({}个端点)",
-                        pluginId, controller.getClass().getSimpleName(), mappings.size());
+                log.info("[{}] Controller注销成功: {} ({}个端点)", pluginId, controller.getClass().getSimpleName(),
+                        mappings.size());
             }
         } catch (Exception e) {
-            throw new IllegalStateException(
-                    "[" + pluginId + "] Controller unregistration failed", e);
+            throw new IllegalStateException("[" + pluginId + "] Controller unregistration failed", e);
         }
     }
 

@@ -14,7 +14,8 @@ class TenantPluginManagerTest {
     void programmaticRegistrarsFreezeWhenPluginLoadingBegins() {
         PluginProperties properties = new PluginProperties();
         properties.setCurrentTenant("test");
-        PluginResourceRegistrar registrar = new PluginResourceRegistrar() {};
+        PluginResourceRegistrar registrar = new PluginResourceRegistrar() {
+        };
 
         try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
             host.refresh();
@@ -23,9 +24,8 @@ class TenantPluginManagerTest {
 
             manager.init();
 
-            assertThrows(
-                    IllegalStateException.class,
-                    () -> manager.addExternalRegistrar(new PluginResourceRegistrar() {}));
+            assertThrows(IllegalStateException.class, () -> manager.addExternalRegistrar(new PluginResourceRegistrar() {
+            }));
         }
     }
 }

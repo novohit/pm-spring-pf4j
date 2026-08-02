@@ -1,11 +1,13 @@
 package com.pmplugin4j.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 事件总线实现
@@ -45,9 +47,8 @@ public class DefaultEventBus implements EventBus {
             try {
                 ((EventListener<Object>) subscription.listener).onEvent(event);
             } catch (Exception e) {
-                log.error("Error handling event {} in listener: {}",
-                    eventType.getSimpleName(),
-                    subscription.listener.getClass().getSimpleName(), e);
+                log.error("Error handling event {} in listener: {}", eventType.getSimpleName(),
+                        subscription.listener.getClass().getSimpleName(), e);
             }
         }
     }
@@ -61,9 +62,7 @@ public class DefaultEventBus implements EventBus {
     public <T> void subscribe(Class<T> eventType, EventListener<T> listener, String tenantId) {
         log.debug("Subscribing to event: {} with tenant: {}", eventType.getSimpleName(), tenantId);
 
-        List<Subscription<?>> subscribers = subscriptions.computeIfAbsent(
-            eventType, k -> new CopyOnWriteArrayList<>()
-        );
+        List<Subscription<?>> subscribers = subscriptions.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>());
 
         subscribers.add(new Subscription<>(listener, tenantId));
     }
@@ -94,8 +93,7 @@ public class DefaultEventBus implements EventBus {
     }
 
     /**
-     * 从事件中提取租户ID
-     * 支持通过反射获取event.getTenantId()方法
+     * 从事件中提取租户ID 支持通过反射获取event.getTenantId()方法
      */
     private String extractTenantId(Object event) {
         try {

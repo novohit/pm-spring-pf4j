@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 /** Example of a host-owned infrastructure bridge for plugin contexts. */
@@ -17,8 +17,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 @ConditionalOnClass(MongoTemplate.class)
 public class MongoPluginExtensionConfiguration {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(MongoPluginExtensionConfiguration.class);
+    private static final Logger log = LoggerFactory.getLogger(MongoPluginExtensionConfiguration.class);
 
     @Bean
     @ConditionalOnBean(MongoTemplate.class)
@@ -36,16 +35,11 @@ public class MongoPluginExtensionConfiguration {
 
             @Override
             public void onBeforeContextRefresh(AnnotationConfigApplicationContext pluginContext) {
-                MongoTemplate hostTemplate =
-                        pluginContext.getParent().getBean(MongoTemplate.class);
-                MongoTemplate pluginTemplate =
-                        new MongoTemplate(hostTemplate.getMongoDatabaseFactory());
+                MongoTemplate hostTemplate = pluginContext.getParent().getBean(MongoTemplate.class);
+                MongoTemplate pluginTemplate = new MongoTemplate(hostTemplate.getMongoDatabaseFactory());
                 pluginContext.getBeanFactory().registerSingleton("mongoTemplate", pluginTemplate);
-                log.info(
-                        "Plugin {} received isolated MongoTemplate: host={}, plugin={}",
-                        pluginContext.getId(),
-                        System.identityHashCode(hostTemplate),
-                        System.identityHashCode(pluginTemplate));
+                log.info("Plugin {} received isolated MongoTemplate: host={}, plugin={}", pluginContext.getId(),
+                        System.identityHashCode(hostTemplate), System.identityHashCode(pluginTemplate));
             }
         };
     }

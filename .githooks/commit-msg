@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Conventional Commits:
+# <type>[optional scope][optional !]: <description>
+conventional_commit_regex='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-zA-Z0-9._/-]+\))?!?: .+$'
+
+commit_message_file="$1"
+IFS= read -r commit_subject < "$commit_message_file"
+
+echo "Commit message identified as: $commit_subject"
+
+# Git-generated merge commits do not use the Conventional Commits structure.
+if [[ "$commit_subject" == Merge\ * ]]; then
+    exit 0
+fi
+
+if [[ "$commit_subject" =~ $conventional_commit_regex ]]; then
+    printf '\033[32mCommit message meets Conventional Commit standards.\033[0m\n'
+    exit 0
+fi
+
+printf '\033[31mThe commit message does not meet the Conventional Commit standard.\033[0m\n'
+echo "Expected: <type>[optional scope][optional !]: <description>"
+echo "Example:  feat(login): add remember-me support"
+echo "Types:    build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+echo "Details:  https://www.conventionalcommits.org/en/v1.0.0/#summary"
+exit 1

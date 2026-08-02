@@ -7,8 +7,7 @@ import org.springframework.context.ApplicationContext;
 /**
  * 插件上下文接口
  * <p>
- * 提供插件访问宿主应用的能力
- * 通过PmPluginFactory注入到每个插件实例
+ * 提供插件访问宿主应用的能力 通过PmPluginFactory注入到每个插件实例
  */
 public interface PluginContext {
 

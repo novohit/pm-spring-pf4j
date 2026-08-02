@@ -1,7 +1,7 @@
 package com.pmplugin4j.jpa;
 
-import com.pmplugin4j.lifecycle.PluginLifecyclePhase;
 import com.pmplugin4j.lifecycle.BuiltInPluginResourceRegistrar;
+import com.pmplugin4j.lifecycle.PluginLifecyclePhase;
 import java.util.Set;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -11,9 +11,7 @@ public final class PluginJpaRegistrar implements BuiltInPluginResourceRegistrar 
 
     @Override
     public Set<PluginLifecyclePhase> phases() {
-        return Set.of(
-                PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH,
-                PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE);
+        return Set.of(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE);
     }
 
     @Override
