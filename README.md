@@ -23,6 +23,7 @@ pm-spring-pf4j
 ├── pm-pf4j-spring-boot-starter  Auto-configuration, plugin manager, host integration
 ├── pm-pf4j-webmvc               Dynamic MVC controllers and OpenAPI integration
 ├── pm-pf4j-mybatis              Plugin mapper and SqlSession integration
+├── pm-pf4j-jpa                  Plugin EntityManager and repository integration
 ├── pm-pf4j-test                 Reusable plugin integration-test support
 └── pm-pf4j-sample
     ├── sample-host              Minimal Spring Boot host
@@ -38,6 +39,21 @@ normally consume `pm-pf4j-spring-boot-starter`.
 ```bash
 mvn clean verify
 ```
+
+## Maven coordinates
+
+Published artifacts use the Maven group `io.github.novohit`. Java packages remain under
+`com.pmplugin4j`.
+
+```xml
+<dependency>
+    <groupId>io.github.novohit</groupId>
+    <artifactId>pm-pf4j-spring-boot-starter</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+Pre-release versions are intended for evaluation while the public API is evolving.
 
 ## Migration provenance
 

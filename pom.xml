@@ -4,18 +4,44 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ikc</groupId>
+    <groupId>io.github.novohit</groupId>
     <artifactId>pm-spring-pf4j</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>pm-spring-pf4j</name>
     <description>Spring Boot plugin runtime built on PF4J</description>
+    <url>https://github.com/novohit/pm-spring-pf4j</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>novohit</id>
+            <name>novo</name>
+            <email>novohit.dev@gmail.com</email>
+            <url>https://github.com/novohit</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/novohit/pm-spring-pf4j.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/novohit/pm-spring-pf4j.git</developerConnection>
+        <url>https://github.com/novohit/pm-spring-pf4j</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <modules>
         <module>pm-pf4j-core</module>
         <module>pm-pf4j-webmvc</module>
         <module>pm-pf4j-mybatis</module>
+        <module>pm-pf4j-jpa</module>
         <module>pm-pf4j-spring-boot-starter</module>
         <module>pm-pf4j-test</module>
         <module>pm-pf4j-sample</module>
@@ -72,6 +98,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>pm-pf4j-jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>pm-pf4j-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -97,4 +128,60 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>central</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals><goal>jar-no-fork</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.11.2</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals><goal>jar</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.7</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals><goal>sign</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.11.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <excludeArtifacts>pm-pf4j-sample,sample-host,sample-plugin</excludeArtifacts>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent><groupId>com.ikc</groupId><artifactId>pm-spring-pf4j</artifactId><version>0.1.0-SNAPSHOT</version></parent>
+    <parent><groupId>io.github.novohit</groupId><artifactId>pm-spring-pf4j</artifactId><version>0.1.0-SNAPSHOT</version></parent>
     <artifactId>pm-pf4j-spring-boot-starter</artifactId>
+    <name>PM PF4J Spring Boot Starter</name>
+    <description>Spring Boot auto-configuration and host integration for the PM PF4J runtime</description>
     <dependencies>
-        <dependency><groupId>com.ikc</groupId><artifactId>pm-pf4j-core</artifactId></dependency>
-        <dependency><groupId>com.ikc</groupId><artifactId>pm-pf4j-webmvc</artifactId></dependency>
-        <dependency><groupId>com.ikc</groupId><artifactId>pm-pf4j-mybatis</artifactId></dependency>
+        <dependency><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-core</artifactId></dependency>
+        <dependency><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-webmvc</artifactId></dependency>
+        <dependency><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-mybatis</artifactId></dependency>
+        <dependency><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-jpa</artifactId><optional>true</optional></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-autoconfigure</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-configuration-processor</artifactId><optional>true</optional></dependency>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent><groupId>com.ikc</groupId><artifactId>pm-pf4j-sample</artifactId><version>0.1.0-SNAPSHOT</version></parent>
+    <parent><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-sample</artifactId><version>0.1.0-SNAPSHOT</version></parent>
     <artifactId>sample-plugin</artifactId>
     <dependencies>
-        <dependency><groupId>com.ikc</groupId><artifactId>pm-pf4j-core</artifactId></dependency>
+        <dependency><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-core</artifactId></dependency>
         <dependency><groupId>org.springframework</groupId><artifactId>spring-web</artifactId></dependency>
     </dependencies>
     <build>
@@ -16,8 +16,8 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Plugin-Id>com.agileboot.plugin.sample.plugin</Plugin-Id>
-                            <Plugin-Class>com.agileboot.plugin.sample.plugin.SamplePlugin</Plugin-Class>
+                            <Plugin-Id>com.pmplugin4j.sample.plugin</Plugin-Id>
+                            <Plugin-Class>com.pmplugin4j.sample.plugin.SamplePlugin</Plugin-Class>
                             <Plugin-Version>${project.version}</Plugin-Version>
                         </manifestEntries>
                     </archive>
