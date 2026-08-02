@@ -5,15 +5,12 @@ import com.agileboot.plugin.api.PluginContext;
 import com.agileboot.plugin.api.PmPlugin;
 import com.agileboot.plugin.config.PluginProperties;
 import com.agileboot.plugin.config.TenantPluginConfig;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
+import com.agileboot.plugin.mybatis.PluginMybatisRegistrar;
 import org.pf4j.DefaultPluginFactory;
 import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -70,33 +67,14 @@ public class PmPluginFactory extends DefaultPluginFactory {
         pluginAC.scan(pluginPackage);
         log.info("[{}] 扫描插件包: {}", pluginId, pluginPackage);
 
-        registerMybatis(pluginId, pluginPackage, pluginAC);
+        new PluginMybatisRegistrar(hostApplicationContext)
+                .register(pluginId, pluginPackage + ".db.mapper", pluginAC);
         registerMongoRepositories(pluginId, pluginPackage, pluginAC);
 
         pluginAC.refresh();
         log.info("[{}] 插件ApplicationContext创建完成，{}个Bean",
                 pluginId, pluginAC.getBeanDefinitionCount());
         return pluginAC;
-    }
-
-    private void registerMybatis(String pluginId, String pluginPackage, AnnotationConfigApplicationContext pluginAC) {
-        try {
-            SqlSessionFactory hostSqlSessionFactory = hostApplicationContext.getBean(SqlSessionFactory.class);
-            DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) pluginAC.getBeanFactory();
-
-            SqlSessionTemplate sqlSessionTemplate = new SqlSessionTemplate(hostSqlSessionFactory);
-            beanFactory.registerSingleton(pluginId + "_sqlSessionTemplate", sqlSessionTemplate);
-
-            String mapperPackage = pluginPackage + ".db.mapper";
-            BeanDefinitionBuilder scannerBuilder = BeanDefinitionBuilder
-                    .genericBeanDefinition(MapperScannerConfigurer.class);
-            scannerBuilder.addPropertyValue("basePackage", mapperPackage);
-            scannerBuilder.addPropertyValue("sqlSessionTemplateBeanName", pluginId + "_sqlSessionTemplate");
-            beanFactory.registerBeanDefinition(pluginId + "_mapperScanner", scannerBuilder.getBeanDefinition());
-            log.info("[{}] 注册MapperScannerConfigurer: {}", pluginId, mapperPackage);
-        } catch (Exception e) {
-            log.warn("[{}] MyBatis注册失败: {}", pluginId, e.getMessage());
-        }
     }
 
     private void registerMongoRepositories(String pluginId, String pluginPackage, AnnotationConfigApplicationContext pluginAC) {

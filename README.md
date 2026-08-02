@@ -15,6 +15,24 @@ Initial scope:
 - resource tracking and lifecycle-safe cleanup;
 - tenant-aware plugin selection at the host boundary.
 
+## Modules
+
+```text
+pm-spring-pf4j
+├── pm-pf4j-core                 Plugin API, events, SPI, shared configuration model
+├── pm-pf4j-spring-boot-starter  Auto-configuration, plugin manager, host integration
+├── pm-pf4j-webmvc               Dynamic MVC controllers and OpenAPI integration
+├── pm-pf4j-mybatis              Plugin mapper and SqlSession integration
+├── pm-pf4j-test                 Reusable plugin integration-test support
+└── pm-pf4j-sample
+    ├── sample-host              Minimal Spring Boot host
+    └── sample-plugin            Minimal dynamically loaded plugin
+```
+
+The modules intentionally separate the plugin contract from optional host integrations. Plugin
+projects should depend on `pm-pf4j-core` and only the integration APIs they use; host applications
+normally consume `pm-pf4j-spring-boot-starter`.
+
 ## Build
 
 ```bash

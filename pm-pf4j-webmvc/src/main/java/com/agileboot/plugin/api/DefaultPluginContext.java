@@ -222,7 +222,6 @@ public class DefaultPluginContext implements PluginContext {
         }
     }
 
-    @Override
     public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
         try {
             // Get from parent (host) context

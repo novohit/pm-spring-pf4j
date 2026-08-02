@@ -3,7 +3,6 @@ package com.agileboot.plugin.api;
 import com.agileboot.plugin.config.TenantPluginConfig;
 import com.agileboot.plugin.event.EventBus;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
  * 插件上下文接口
@@ -63,8 +62,4 @@ public interface PluginContext {
      */
     void unregisterController(Object controller);
 
-    /**
-     * 获取RequestMappingHandlerMapping
-     */
-    RequestMappingHandlerMapping getRequestMappingHandlerMapping();
 }
