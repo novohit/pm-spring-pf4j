@@ -1,47 +1,44 @@
 package com.pmplugin4j.api;
 
-import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-/**
- * AgileBoot插件基类
- *
- * 所有业务插件必须继承此类
- * 通过构造函数注入PluginContext，提供访问宿主应用的能力
- */
-public abstract class PmPlugin extends Plugin {
+/** Business plugin customized and hosted by the framework's Spring-aware PF4J wrapper. */
+public abstract class PmPlugin {
 
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+    private final PluginWrapper wrapper;
+    private PluginContext pluginContext;
 
-    /**
-     * 插件上下文（由PmPluginFactory注入）
-     */
-    protected final PluginContext context;
-
-    /**
-     * 构造函数 - 由PmPluginFactory调用
-     *
-     * @param wrapper PF4J插件包装器
-     * @param context 插件上下文
-     */
-    public PmPlugin(PluginWrapper wrapper, PluginContext context) {
-        super(wrapper);
-        this.context = context;
+    protected PmPlugin() {
+        this.wrapper = null;
     }
 
-    /**
-     * 获取插件上下文
-     */
-    protected PluginContext getContext() {
-        return context;
+    protected PmPlugin(PluginWrapper wrapper) {
+        this.wrapper = wrapper;
     }
 
-    /**
-     * 获取服务（便捷方法）
-     */
-    protected <T> T getService(Class<T> serviceClass) {
-        return context.getService(serviceClass);
+    protected abstract AnnotationConfigApplicationContext beforeApplicationContextRefresh(
+            AnnotationConfigApplicationContext context);
+
+    protected abstract void afterApplicationContextReady(
+            AnnotationConfigApplicationContext context);
+
+    public final void attachPluginContext(PluginContext pluginContext) {
+        this.pluginContext = pluginContext;
+    }
+
+    protected final PluginContext getContext() {
+        if (pluginContext == null) {
+            throw new IllegalStateException("Plugin context is not available before plugin start");
+        }
+        return pluginContext;
+    }
+
+    protected final <T> T getService(Class<T> serviceClass) {
+        return getContext().getService(serviceClass);
+    }
+
+    protected final PluginWrapper getWrapper() {
+        return wrapper;
     }
 }

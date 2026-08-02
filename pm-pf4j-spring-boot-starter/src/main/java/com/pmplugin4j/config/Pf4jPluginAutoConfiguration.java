@@ -20,7 +20,8 @@ import org.springframework.context.annotation.Configuration;
 public class Pf4jPluginAutoConfiguration {
 
     @Bean
-    public TenantPluginManager tenantPluginManager(PluginProperties pluginProperties, ApplicationContext applicationContext) {
+    public TenantPluginManager tenantPluginManager(PluginProperties pluginProperties,
+            ApplicationContext applicationContext) {
         return new TenantPluginManager(pluginProperties, applicationContext);
     }
 

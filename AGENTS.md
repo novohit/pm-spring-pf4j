@@ -72,6 +72,11 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
 
 ## Testing Expectations
 
+- Every production-code change must add or update tests that verify the changed behavior.
+- During implementation, run the affected module tests with reactor dependencies by using
+  `mvn -pl <module> -am test -DskipTests=false`.
+- Before committing or handing off any refactor, run `mvn clean verify` and report the result.
+- Do not treat a successful compilation as sufficient verification for behavior changes.
 - Put focused unit tests beside the owning module.
 - Add lifecycle tests for start, partial-start rollback, stop, restart, and unload behavior.
 - For dynamic resources, assert both registration and cleanup.

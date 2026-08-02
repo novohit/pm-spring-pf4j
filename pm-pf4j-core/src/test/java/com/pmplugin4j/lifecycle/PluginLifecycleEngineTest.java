@@ -12,49 +12,73 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 class PluginLifecycleEngineTest {
 
     @Test
-    void registersForwardAndCleansInReverseOrder() {
+    void executesForwardAndClosesInReverseOrder() {
         List<String> calls = new ArrayList<>();
-        PluginLifecycleEngine engine =
-                new PluginLifecycleEngine(List.of(registrar("second", 20, calls), registrar("first", 10, calls)));
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
+            host.refresh();
+            PluginLifecycleEngine engine = PluginLifecycleEngine.create(
+                    host,
+                    List.of(registrar("second", 20, calls), registrar("first", 10, calls)),
+                    List.of());
+            AnnotationConfigApplicationContext plugin = new AnnotationConfigApplicationContext();
 
-        engine.execute(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, context);
-        engine.execute(PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE, context);
+            engine.executePhase(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, plugin);
+            engine.executePhase(PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE, plugin);
 
-        assertEquals(List.of("start:first", "start:second", "stop:second", "stop:first"), calls);
-        context.close();
+            assertEquals(List.of("start:first", "start:second", "stop:second", "stop:first"), calls);
+            plugin.close();
+        }
     }
 
     @Test
-    void rollsBackCompletedRegistrarsWhenStartupFails() {
+    void isolatesExternalRegistrarFailure() {
         List<String> calls = new ArrayList<>();
-        PluginResourceRegistrar failing =
-                new PluginResourceRegistrar() {
-                    @Override
-                    public Set<PluginLifecyclePhase> phases() {
-                        return Set.of(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH);
-                    }
+        PluginResourceRegistrar failing = new PluginResourceRegistrar() {
+            @Override
+            public Set<PluginLifecyclePhase> phases() {
+                return Set.of(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH);
+            }
 
-                    @Override
-                    public int order() {
-                        return 20;
-                    }
+            @Override
+            public void onBeforeContextRefresh(AnnotationConfigApplicationContext context) {
+                calls.add("external");
+                throw new IllegalStateException("boom");
+            }
+        };
+        try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
+            host.refresh();
+            PluginLifecycleEngine engine =
+                    PluginLifecycleEngine.create(host, List.of(), List.of(failing));
+            engine.executePhase(
+                    PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH,
+                    new AnnotationConfigApplicationContext());
+        }
+        assertEquals(List.of("external"), calls);
+    }
 
-                    @Override
-                    public void beforeContextRefresh(AnnotationConfigApplicationContext context) {
-                        calls.add("start:failing");
-                        throw new IllegalStateException("boom");
-                    }
-                };
-        PluginLifecycleEngine engine =
-                new PluginLifecycleEngine(List.of(registrar("first", 10, calls), failing));
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+    @Test
+    void propagatesBuiltInRegistrarFailure() {
+        PluginResourceRegistrar failing = new PluginResourceRegistrar() {
+            @Override
+            public Set<PluginLifecyclePhase> phases() {
+                return Set.of(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH);
+            }
 
-        assertThrows(
-                PluginLifecycleException.class,
-                () -> engine.execute(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, context));
-        assertEquals(List.of("start:first", "start:failing", "stop:first"), calls);
-        context.close();
+            @Override
+            public void onBeforeContextRefresh(AnnotationConfigApplicationContext context) {
+                throw new IllegalStateException("boom");
+            }
+        };
+        try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext()) {
+            host.refresh();
+            PluginLifecycleEngine engine =
+                    PluginLifecycleEngine.create(host, List.of(failing), List.of());
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> engine.executePhase(
+                            PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH,
+                            new AnnotationConfigApplicationContext()));
+        }
     }
 
     private static PluginResourceRegistrar registrar(String name, int order, List<String> calls) {
@@ -72,12 +96,12 @@ class PluginLifecycleEngineTest {
             }
 
             @Override
-            public void beforeContextRefresh(AnnotationConfigApplicationContext context) {
+            public void onBeforeContextRefresh(AnnotationConfigApplicationContext context) {
                 calls.add("start:" + name);
             }
 
             @Override
-            public void beforeContextClose(AnnotationConfigApplicationContext context) {
+            public void onBeforeContextClose(AnnotationConfigApplicationContext context) {
                 calls.add("stop:" + name);
             }
         };

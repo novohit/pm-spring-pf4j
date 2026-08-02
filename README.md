@@ -12,6 +12,7 @@ Initial scope:
 - Spring dependency injection inside plugins;
 - dynamic Spring MVC controller registration;
 - MyBatis mapper integration;
+- optional JPA integration;
 - resource tracking and lifecycle-safe cleanup;
 - tenant-aware plugin selection at the host boundary.
 
@@ -33,6 +34,8 @@ pm-spring-pf4j
 The modules intentionally separate the plugin contract from optional host integrations. Plugin
 projects should depend on `pm-pf4j-core` and only the integration APIs they use; host applications
 normally consume `pm-pf4j-spring-boot-starter`.
+
+See [Plugin Extensions](docs/plugin-extensions.md) for the three supported integration styles.
 
 ## Build
 

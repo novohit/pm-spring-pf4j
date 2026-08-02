@@ -1,9 +1,9 @@
 package com.pmplugin4j.manager;
 
-import com.pmplugin4j.api.DefaultPluginContext;
 import com.pmplugin4j.config.PluginProperties;
 import com.pmplugin4j.config.TenantPluginConfig;
 import com.pmplugin4j.factory.PmPluginFactory;
+import com.pmplugin4j.lifecycle.PluginResourceRegistrar;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
@@ -34,6 +34,8 @@ public class TenantPluginManager {
 
     private final PluginProperties pluginProperties;
     private final ApplicationContext applicationContext;
+    private final List<PluginResourceRegistrar> externalRegistrars = new ArrayList<>();
+    private volatile boolean registrarsFrozen;
     private JarPluginManager pf4jManager;
     private PmPluginFactory pluginFactory;
     private final Map<String, PluginWrapper> loadedPlugins = new ConcurrentHashMap<>();
@@ -42,6 +44,18 @@ public class TenantPluginManager {
     public TenantPluginManager(PluginProperties pluginProperties, ApplicationContext applicationContext) {
         this.pluginProperties = pluginProperties;
         this.applicationContext = applicationContext;
+    }
+
+    public synchronized void addExternalRegistrar(PluginResourceRegistrar registrar) {
+        Objects.requireNonNull(registrar, "registrar must not be null");
+        if (registrarsFrozen) {
+            throw new IllegalStateException("Registrar must be added before plugin loading begins");
+        }
+        if (externalRegistrars.contains(registrar)) {
+            log.warn("Duplicate registrar ignored: {}", registrar.getClass().getName());
+            return;
+        }
+        externalRegistrars.add(registrar);
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -55,7 +69,9 @@ public class TenantPluginManager {
         log.info("Initializing plugins for tenant: {}", currentTenantId);
 
         // 创建PF4J PluginManager，使用自定义PluginFactory
-        pluginFactory = new PmPluginFactory(applicationContext, pluginProperties);
+        registrarsFrozen = true;
+        pluginFactory = new PmPluginFactory(
+                applicationContext, pluginProperties, List.copyOf(externalRegistrars));
         PmJarPluginManager.setPendingFactory(pluginFactory);
         pf4jManager = new PmJarPluginManager(pluginFactory);
 
@@ -159,12 +175,6 @@ public class TenantPluginManager {
             PluginWrapper wrapper = pf4jManager.getPlugin(loadedPluginId);
             loadedPlugins.put(pluginId, wrapper);
 
-            // Auto-register controllers from plugin's ApplicationContext
-            DefaultPluginContext pluginContext = pluginFactory.getPluginContexts().get(pluginId);
-            if (pluginContext != null) {
-                pluginContext.autoRegisterControllers();
-            }
-
             log.info("Plugin loaded and started: {}", pluginId);
 
         } catch (Exception e) {
@@ -183,14 +193,6 @@ public class TenantPluginManager {
         }
 
         try {
-            // Unregister controllers and close AC before stopping PF4J
-            DefaultPluginContext pluginContext = pluginFactory.getPluginContexts().get(pluginId);
-            if (pluginContext != null) {
-                pluginContext.unregisterAllControllers();
-                pluginContext.close();
-                pluginFactory.getPluginContexts().remove(pluginId);
-            }
-
             pf4jManager.stopPlugin(pluginId);
             pf4jManager.unloadPlugin(pluginId);
             loadedPlugins.remove(pluginId);
@@ -198,6 +200,16 @@ public class TenantPluginManager {
         } catch (Exception e) {
             log.error("Failed to unload plugin: {}", pluginId, e);
         }
+    }
+
+    /** Stops and starts a plugin, rebuilding its Spring context. */
+    public PluginState restartPlugin(String pluginId) {
+        PluginWrapper wrapper = loadedPlugins.get(pluginId);
+        if (wrapper == null) {
+            return PluginState.UNLOADED;
+        }
+        pf4jManager.stopPlugin(pluginId);
+        return pf4jManager.startPlugin(pluginId);
     }
 
     /**

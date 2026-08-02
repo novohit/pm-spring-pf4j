@@ -2,87 +2,128 @@ package com.pmplugin4j.lifecycle;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-/** Executes plugin resource registrars in forward order and cleanup in reverse order. */
+/**
+ * Dispatches lifecycle phases to registered {@link PluginResourceRegistrar}s.
+ *
+ * <p>Failures from framework registrars propagate to the plugin lifecycle. Failures from external
+ * registrars are isolated and logged so that an optional host extension cannot prevent the plugin
+ * from starting or stopping.
+ */
 public final class PluginLifecycleEngine {
 
-    private static final Comparator<PluginResourceRegistrar> ORDER =
-            Comparator.comparingInt(PluginResourceRegistrar::order)
-                    .thenComparing(registrar -> registrar.getClass().getName());
+    private static final Logger log = LoggerFactory.getLogger(PluginLifecycleEngine.class);
 
     private final List<PluginResourceRegistrar> registrars;
-    private final Map<AnnotationConfigApplicationContext, List<PluginResourceRegistrar>> executed =
-            new IdentityHashMap<>();
+    private final Set<PluginResourceRegistrar> externalRegistrars;
 
-    public PluginLifecycleEngine(List<PluginResourceRegistrar> registrars) {
-        this.registrars = registrars.stream().distinct().sorted(ORDER).toList();
+    private PluginLifecycleEngine(
+            ApplicationContext hostContext,
+            List<PluginResourceRegistrar> builtInRegistrars,
+            List<PluginResourceRegistrar> programmaticRegistrars) {
+        // External registrars come from host Spring beans and the programmatic API. Framework
+        // registrars discovered as Spring beans are kept in the framework failure domain.
+        List<PluginResourceRegistrar> springRegistrars = new ArrayList<>(
+                hostContext.getBeansOfType(PluginResourceRegistrar.class, false, false).values());
+        List<PluginResourceRegistrar> external = new ArrayList<>();
+        springRegistrars.stream()
+                .filter(registrar -> !(registrar instanceof BuiltInPluginResourceRegistrar))
+                .forEach(external::add);
+        external.addAll(programmaticRegistrars);
+
+        // Merge framework and external registrars while preserving source order and removing
+        // duplicate instances.
+        LinkedHashSet<PluginResourceRegistrar> all = new LinkedHashSet<>(builtInRegistrars);
+        all.addAll(springRegistrars);
+        all.addAll(programmaticRegistrars);
+        this.registrars = List.copyOf(all);
+        this.externalRegistrars = Set.copyOf(external);
     }
 
-    public synchronized void execute(
+    /**
+     * Assembles the lifecycle engine from framework registrars, host Spring beans, and registrars
+     * added through the programmatic API.
+     */
+    public static PluginLifecycleEngine create(
+            ApplicationContext hostContext,
+            List<PluginResourceRegistrar> builtInRegistrars,
+            List<PluginResourceRegistrar> programmaticRegistrars) {
+        return new PluginLifecycleEngine(hostContext, builtInRegistrars, programmaticRegistrars);
+    }
+
+    /** Executes all registrars participating in one lifecycle phase. */
+    public void executePhase(
             PluginLifecyclePhase phase, AnnotationConfigApplicationContext pluginContext) {
-        if (phase == PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE) {
-            cleanup(pluginContext);
+        if (phase == null || pluginContext == null) {
+            log.error("Lifecycle phase invoked with null: phase={}, context={}", phase, pluginContext);
             return;
         }
+        long start = System.currentTimeMillis();
+        Comparator<PluginResourceRegistrar> order =
+                Comparator.comparingInt(PluginResourceRegistrar::order)
+                        .thenComparing(registrar -> registrar.getClass().getName());
+        if (phase == PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE) {
+            order = order.reversed();
+        }
 
-        List<PluginResourceRegistrar> completed =
-                executed.computeIfAbsent(pluginContext, ignored -> new ArrayList<>());
-        for (PluginResourceRegistrar registrar : registrars) {
-            if (!registrar.phases().contains(phase)) {
-                continue;
-            }
-            try {
-                invoke(registrar, phase, pluginContext);
-                if (!completed.contains(registrar)) {
-                    completed.add(registrar);
+        // All registrars share one ordered pipeline. Closing reverses the order used during startup.
+        List<String> completed = new ArrayList<>();
+        for (PluginResourceRegistrar registrar : registrars.stream()
+                .filter(candidate -> candidate.phases().contains(phase))
+                .sorted(order)
+                .toList()) {
+            if (externalRegistrars.contains(registrar)) {
+                if (dispatchExternal(registrar, phase, pluginContext)) {
+                    completed.add(registrar.getClass().getSimpleName());
                 }
-            } catch (RuntimeException exception) {
-                cleanup(pluginContext);
-                throw new PluginLifecycleException(
-                        "Plugin lifecycle phase " + phase + " failed in "
-                                + registrar.getClass().getName(), exception);
+            } else {
+                dispatch(registrar, phase, pluginContext);
+                completed.add(registrar.getClass().getSimpleName());
             }
+        }
+        log.info(
+                "Lifecycle phase {} for plugin '{}': {} registrars executed ({} ms) - {}",
+                phase,
+                pluginContext.getId(),
+                completed.size(),
+                System.currentTimeMillis() - start,
+                String.join(", ", completed));
+    }
+
+    private static boolean dispatchExternal(
+            PluginResourceRegistrar registrar,
+            PluginLifecyclePhase phase,
+            AnnotationConfigApplicationContext pluginContext) {
+        try {
+            dispatch(registrar, phase, pluginContext);
+            return true;
+        } catch (Exception exception) {
+            log.error(
+                    "Registrar {} failed at phase {} for plugin '{}': {}",
+                    registrar.getClass().getName(),
+                    phase,
+                    pluginContext.getId(),
+                    exception.getMessage(),
+                    exception);
+            return false;
         }
     }
 
-    private void cleanup(AnnotationConfigApplicationContext pluginContext) {
-        List<PluginResourceRegistrar> completed = executed.remove(pluginContext);
-        if (completed == null) {
-            completed = registrars;
-        }
-        RuntimeException firstFailure = null;
-        for (int index = completed.size() - 1; index >= 0; index--) {
-            PluginResourceRegistrar registrar = completed.get(index);
-            if (!registrar.phases().contains(PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE)) {
-                continue;
-            }
-            try {
-                registrar.beforeContextClose(pluginContext);
-            } catch (RuntimeException exception) {
-                if (firstFailure == null) {
-                    firstFailure = exception;
-                } else {
-                    firstFailure.addSuppressed(exception);
-                }
-            }
-        }
-        if (firstFailure != null) {
-            throw new PluginLifecycleException("Plugin resource cleanup failed", firstFailure);
-        }
-    }
-
-    private static void invoke(
+    private static void dispatch(
             PluginResourceRegistrar registrar,
             PluginLifecyclePhase phase,
             AnnotationConfigApplicationContext pluginContext) {
         switch (phase) {
-            case BEFORE_CONTEXT_REFRESH -> registrar.beforeContextRefresh(pluginContext);
-            case AFTER_CONTEXT_REFRESH -> registrar.afterContextRefresh(pluginContext);
-            case BEFORE_CONTEXT_CLOSE -> registrar.beforeContextClose(pluginContext);
+            case BEFORE_CONTEXT_REFRESH -> registrar.onBeforeContextRefresh(pluginContext);
+            case AFTER_CONTEXT_REFRESH -> registrar.onAfterContextRefresh(pluginContext);
+            case BEFORE_CONTEXT_CLOSE -> registrar.onBeforeContextClose(pluginContext);
         }
     }
 }

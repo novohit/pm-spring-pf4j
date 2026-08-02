@@ -1,13 +1,13 @@
 package com.pmplugin4j.jpa;
 
 import com.pmplugin4j.lifecycle.PluginLifecyclePhase;
-import com.pmplugin4j.lifecycle.PluginResourceRegistrar;
+import com.pmplugin4j.lifecycle.BuiltInPluginResourceRegistrar;
 import java.util.Set;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /** Lifecycle adapter for optional per-plugin JPA infrastructure. */
-public final class PluginJpaRegistrar implements PluginResourceRegistrar {
+public final class PluginJpaRegistrar implements BuiltInPluginResourceRegistrar {
 
     @Override
     public Set<PluginLifecyclePhase> phases() {
@@ -22,7 +22,7 @@ public final class PluginJpaRegistrar implements PluginResourceRegistrar {
     }
 
     @Override
-    public void beforeContextRefresh(AnnotationConfigApplicationContext pluginContext) {
+    public void onBeforeContextRefresh(AnnotationConfigApplicationContext pluginContext) {
         PluginJpaManager manager = manager(pluginContext);
         if (manager == null) {
             return;
@@ -35,7 +35,7 @@ public final class PluginJpaRegistrar implements PluginResourceRegistrar {
     }
 
     @Override
-    public void beforeContextClose(AnnotationConfigApplicationContext pluginContext) {
+    public void onBeforeContextClose(AnnotationConfigApplicationContext pluginContext) {
         PluginJpaManager manager = manager(pluginContext);
         if (manager != null) {
             manager.cleanup(pluginContext.getId(), pluginContext);

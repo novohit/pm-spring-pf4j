@@ -105,11 +105,6 @@ public class DefaultPluginContext implements PluginContext {
 
         if (!controllers.isEmpty()) {
             log.info("[{}] 自动注册{}个Controller", pluginId, controllers.size());
-            // 注册 OpenAPI 分组，使 Swagger 文档包含插件接口
-            ApplicationContext hostAC = pluginApplicationContext.getParent();
-            if (hostAC != null) {
-                com.pmplugin4j.openapi.PluginOpenApiConfig.registerPluginOpenApi(hostAC, pluginId, controllers);
-            }
         }
     }
 
@@ -186,7 +181,8 @@ public class DefaultPluginContext implements PluginContext {
             log.info("[{}] Controller注册成功: {} ({}个端点)", pluginId, controllerClass.getSimpleName(), mappings.size());
 
         } catch (Exception e) {
-            log.error("[{}] Controller注册失败: {}", pluginId, e.getMessage(), e);
+            throw new IllegalStateException(
+                    "[" + pluginId + "] Controller registration failed", e);
         }
     }
 
@@ -207,18 +203,14 @@ public class DefaultPluginContext implements PluginContext {
                         pluginId, controller.getClass().getSimpleName(), mappings.size());
             }
         } catch (Exception e) {
-            log.error("[{}] Controller注销失败: {}", pluginId, e.getMessage(), e);
+            throw new IllegalStateException(
+                    "[" + pluginId + "] Controller unregistration failed", e);
         }
     }
 
     public void unregisterAllControllers() {
         for (Object controller : new ArrayList<>(registeredMappings.keySet())) {
             unregisterController(controller);
-        }
-        // 清理 OpenAPI 注册
-        ApplicationContext hostAC = pluginApplicationContext.getParent();
-        if (hostAC != null) {
-            com.pmplugin4j.openapi.PluginOpenApiConfig.unregisterPluginOpenApi(hostAC, pluginId);
         }
     }
 
