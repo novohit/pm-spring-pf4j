@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * 配置来源：application-plugin.yml 职责：管理租户-插件映射和全局插件配置
  */
-@ConfigurationProperties(prefix = "agileboot.plugin")
+@ConfigurationProperties(prefix = "pm.pf4j")
 public class PluginProperties {
 
     /** 是否启用插件系统 */

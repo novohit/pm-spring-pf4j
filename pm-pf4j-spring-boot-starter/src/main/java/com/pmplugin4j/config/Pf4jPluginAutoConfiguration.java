@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  * PF4J插件框架自动配置
  */
 @Configuration
-@ConditionalOnProperty(prefix = "agileboot.plugin", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "pm.pf4j", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(PluginProperties.class)
 public class Pf4jPluginAutoConfiguration {
 

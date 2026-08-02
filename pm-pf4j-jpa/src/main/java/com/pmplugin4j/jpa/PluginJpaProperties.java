@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("pm.plugin.jpa")
+@ConfigurationProperties("pm.pf4j.jpa")
 public class PluginJpaProperties {
 
     private String ddlAuto = "none";

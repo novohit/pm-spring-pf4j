@@ -4,7 +4,7 @@
 
 ## Status
 
-The project is being extracted from a production application and redesigned as a reusable dependency. The current `0.1.0-SNAPSHOT` API is not stable yet.
+The project is being extracted from a production application and redesigned as a reusable dependency. The current `0.1.0-alpha.1` API is not stable yet.
 
 Initial scope:
 
@@ -52,7 +52,7 @@ Published artifacts use the Maven group `io.github.novohit`. Java packages remai
 <dependency>
     <groupId>io.github.novohit</groupId>
     <artifactId>pm-pf4j-spring-boot-starter</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0-alpha.1</version>
 </dependency>
 ```
 
