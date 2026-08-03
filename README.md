@@ -20,16 +20,17 @@ Initial scope:
 
 ```text
 pm-spring-pf4j
+├── pm-pf4j-bom                  Published dependency version alignment
 ├── pm-pf4j-core                 Plugin API, events, SPI, shared configuration model
-├── pm-pf4j-spring-boot-starter  Auto-configuration, plugin manager, host integration
-├── pm-pf4j-webmvc               Dynamic MVC controllers and OpenAPI integration
-├── pm-pf4j-mybatis              Plugin mapper and SqlSession integration
-├── pm-pf4j-jpa                  Plugin EntityManager and repository integration
-├── pm-pf4j-security             Plugin authentication and security filter-chain extensions
-├── pm-pf4j-test                 Reusable plugin integration-test support
-└── pm-pf4j-sample
-    ├── sample-host              Minimal Spring Boot host
-    └── sample-plugin            Minimal dynamically loaded plugin
+├── pm-pf4j-spring-boot/         Auto-configuration and dependency starter modules
+├── pm-pf4j-web/                 MVC and WebFlux integration modules
+├── pm-pf4j-data/                MyBatis and JPA integration modules
+├── pm-pf4j-security/            Core, MVC, and WebFlux security integrations
+├── pm-pf4j-testing/             Reusable plugin testing support
+├── pm-pf4j-integration-tests    Cross-module runtime verification
+└── pm-pf4j-samples/
+    ├── sample-host-webmvc       Spring MVC host with a MongoDB resource bridge
+    └── sample-plugin-data       Dynamic web plugin consuming the MongoDB bridge
 ```
 
 The modules intentionally separate the plugin contract from optional host integrations. Plugin

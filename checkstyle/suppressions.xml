@@ -12,7 +12,11 @@
     <!-- The security compatibility layer intentionally preserves its published API and control-flow source shape. -->
     <suppress
         checks="AvoidStarImport|CustomImportOrder|EmptyCatchBlock|LineLength|MultipleVariableDeclarations|NeedBraces|RequireEmptyLineBeforeBlockTagGroup|VariableDeclarationUsageDistance"
-        files=".*pm-pf4j-security/src/main/java/.*[.]java"/>
+        files=".*pm-pf4j-security.*/src/main/java/.*[.]java"/>
     <suppress checks="LineLength"
         files=".*DefaultPluginAnonymousPathRegistry[.]java"/>
+    <!-- The WebFlux routing DSL preserves Spring's uppercase HTTP method API and mechanically migrated source shape. -->
+    <suppress
+        checks="AbbreviationAsWordInName|AvoidStarImport|CustomImportOrder|MethodName|NeedBraces"
+        files=".*pm-pf4j-webflux/src/main/java/com/pmplugin4j/webflux/(PmRouterFunctions|PmPluginWebFluxDefaultRouterFunctionRegistry|PmPluginWebFluxRequestMappingHandlerMapping|PmPluginWebFluxRouterFunctionRegistry)[.]java"/>
 </suppressions>

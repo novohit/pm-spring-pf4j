@@ -1,5 +1,6 @@
 package com.pmplugin4j.event;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,7 +99,7 @@ public class DefaultEventBus implements EventBus {
     private String extractTenantId(Object event) {
         try {
             // 尝试通过反射调用getTenantId()方法
-            var method = event.getClass().getMethod("getTenantId");
+            Method method = event.getClass().getMethod("getTenantId");
             return (String) method.invoke(event);
         } catch (Exception e) {
             // 如果没有getTenantId方法，返回null

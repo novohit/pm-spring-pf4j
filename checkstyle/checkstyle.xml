@@ -50,13 +50,15 @@
     <property name="lineRange" value="$2"/>
   </module>
 
+  <!-- TODO Re-enable LineLength after aligning Eclipse Formatter wrapping with Checkstyle. -->
+  <!--
   <module name="LineLength">
     <property name="fileExtensions" value="java"/>
-    <!-- 代码、普通注释和 Javadoc 统一保持 120 字符；URL 等不可安全折行内容除外。 -->
     <property name="max" value="120"/>
     <property name="ignorePattern"
              value="^package.*|^import.*|href\s*=\s*&quot;[^&quot;]*&quot;|http://|https://|ftp://"/>
   </module>
+  -->
   <module name="FileTabCharacter">
     <property name="fileExtensions" value="java"/>
     <property name="eachLine" value="true"/>

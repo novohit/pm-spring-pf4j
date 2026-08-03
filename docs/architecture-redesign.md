@@ -18,13 +18,21 @@ The first production baseline must provide:
 ## Module layout
 
 ```text
-pm-pf4j-core                  public plugin API and lifecycle SPI
-pm-pf4j-spring-boot-starter   host bootstrap, PF4J manager, capability detection
-pm-pf4j-webmvc                MVC route registration and OpenAPI
-pm-pf4j-mybatis               per-plugin MyBatis-Plus infrastructure
-pm-pf4j-jpa                   per-plugin JPA/Hibernate infrastructure
-pm-pf4j-test                  host fixtures and lifecycle assertions
-pm-pf4j-sample                executable host and example plugins
+pm-pf4j-bom                                      published artifact version alignment
+pm-pf4j-core                                     public plugin API and lifecycle SPI
+pm-pf4j-web/pm-pf4j-webmvc                       MVC route registration and OpenAPI
+pm-pf4j-web/pm-pf4j-webflux                      reactive annotated and functional routing
+pm-pf4j-data/pm-pf4j-mybatis                     per-plugin MyBatis-Plus infrastructure
+pm-pf4j-data/pm-pf4j-jpa                         per-plugin JPA/Hibernate infrastructure
+pm-pf4j-security/pm-pf4j-security-core           shared authentication orchestration
+pm-pf4j-security/pm-pf4j-security-webmvc         servlet filter extension slots
+pm-pf4j-security/pm-pf4j-security-webflux        reactive WebFilter extension slots
+pm-pf4j-spring-boot/pm-pf4j-spring-boot-autoconfigure
+                                                   host bootstrap and PF4J manager
+pm-pf4j-spring-boot/pm-pf4j-spring-boot-starter dependency-only host entry point
+pm-pf4j-testing/pm-pf4j-testkit                  reusable lifecycle test support
+pm-pf4j-integration-tests                        cross-module runtime verification
+pm-pf4j-samples                                  executable hosts and example plugins
 ```
 
 Optional integrations depend on `core`; `core` never depends on an integration. The starter

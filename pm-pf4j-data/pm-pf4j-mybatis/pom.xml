@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>io.github.novohit</groupId><artifactId>pm-spring-pf4j</artifactId><version>0.1.0-alpha.1</version><relativePath>../../pom.xml</relativePath></parent>
+    <artifactId>pm-pf4j-mybatis</artifactId>
+    <name>PM PF4J MyBatis</name>
+    <description>MyBatis mapper and SqlSession integration for PF4J plugins</description>
+    <dependencies>
+        <dependency><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-core</artifactId></dependency>
+        <dependency><groupId>org.mybatis.spring.boot</groupId><artifactId>mybatis-spring-boot-starter</artifactId></dependency>
+        <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><scope>test</scope></dependency>
+    </dependencies>
+</project>

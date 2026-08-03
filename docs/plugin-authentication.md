@@ -32,7 +32,7 @@
 ```xml
 <dependency>
     <groupId>io.github.novohit</groupId>
-    <artifactId>pm-pf4j-security</artifactId>
+    <artifactId>pm-pf4j-security-webmvc</artifactId>
     <version>${pm-spring-pf4j.version}</version>
 </dependency>
 ```
@@ -42,7 +42,7 @@
 ```xml
 <dependency>
     <groupId>io.github.novohit</groupId>
-    <artifactId>pm-pf4j-security</artifactId>
+    <artifactId>pm-pf4j-security-core</artifactId>
     <version>${pm-spring-pf4j.version}</version>
     <scope>provided</scope>
 </dependency>
@@ -529,15 +529,16 @@ public class ReplayAttackFilter implements FirstFilterExtension {
 Filter 影响面是整个应用，**默认关闭**：
 
 ```yaml
-gj:
-  security:
-    filter:
-      enabled: true                              # 第一层：全局开关
-      allowed-positions: FIRST, LAST             # 第二层：位置白名单
-    plugins:
-      gj.payment.module:                         # 第三层：插件授权
-        filter:
-          allowed-positions: FIRST, LAST
+pm:
+  pf4j:
+    security:
+      filter:
+        enabled: true                            # 第一层：全局开关
+        allowed-positions: FIRST, LAST           # 第二层：位置白名单
+      plugins:
+        com.pmplugin4j.payment:                  # 第三层：插件授权
+          filter:
+            allowed-positions: FIRST, LAST
 ```
 
 三层全通过才注入。沙箱隔离：一个插件的 Filter 异常不阻断其他 Filter。

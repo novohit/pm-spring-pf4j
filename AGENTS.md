@@ -44,14 +44,20 @@ these hooks to commit formatting, Checkstyle, or Conventional Commit violations.
 
 | Module | Responsibility |
 |---|---|
+| `pm-pf4j-bom` | Version alignment for all published PM PF4J artifacts |
 | `pm-pf4j-core` | Public plugin API, lifecycle engine, events, configuration model, and resource registrar SPI |
-| `pm-pf4j-webmvc` | Dynamic MVC controller registration/removal and OpenAPI integration |
-| `pm-pf4j-mybatis` | Plugin-owned MyBatis mapper and SqlSession resources |
-| `pm-pf4j-jpa` | Plugin-owned JPA EntityManager and repository resources |
-| `pm-pf4j-security` | Plugin authentication providers, security-chain orchestration, and Servlet/WebFlux filter extension slots |
-| `pm-pf4j-spring-boot-starter` | Auto-configuration, plugin managers, host context integration, and configuration properties |
-| `pm-pf4j-test` | Reusable host/plugin lifecycle testing support |
-| `pm-pf4j-sample` | Example host and plugin; never publish these artifacts to Maven Central |
+| `pm-pf4j-web/pm-pf4j-webmvc` | Dynamic MVC controller registration/removal and OpenAPI integration |
+| `pm-pf4j-web/pm-pf4j-webflux` | Dynamic annotated and functional WebFlux route registration/removal |
+| `pm-pf4j-data/pm-pf4j-mybatis` | Plugin-owned MyBatis mapper and SqlSession resources |
+| `pm-pf4j-data/pm-pf4j-jpa` | Plugin-owned JPA EntityManager and repository resources |
+| `pm-pf4j-security/pm-pf4j-security-core` | Plugin authentication providers, chain strategies, events, and shared registries |
+| `pm-pf4j-security/pm-pf4j-security-webmvc` | Servlet security-chain and filter extension integration |
+| `pm-pf4j-security/pm-pf4j-security-webflux` | Reactive security-chain and WebFilter extension integration |
+| `pm-pf4j-spring-boot/pm-pf4j-spring-boot-autoconfigure` | Auto-configuration, plugin managers, host context integration, and configuration properties |
+| `pm-pf4j-spring-boot/pm-pf4j-spring-boot-starter` | Dependency-only entry point for Spring Boot hosts |
+| `pm-pf4j-testing/pm-pf4j-testkit` | Reusable host/plugin lifecycle testing support |
+| `pm-pf4j-integration-tests` | Non-published cross-module runtime and auto-configuration verification |
+| `pm-pf4j-samples` | Example hosts and plugins; never publish these artifacts to Maven Central |
 
 Keep optional framework integrations out of `pm-pf4j-core`. The core module must not depend on
 Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
@@ -73,6 +79,7 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
 
 ## Spring and Compatibility Rules
 
+- Do not use Java local-variable type inference (`var`); declare explicit local variable types.
 - Use `pm.pf4j` as the host plugin configuration namespace and `pm.pf4j.jpa` for the optional JPA
   integration. New integrations must remain beneath the `pm.pf4j` namespace.
 - Use Spring Boot auto-configuration imports under
@@ -97,7 +104,7 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
 - For dynamic resources, assert both registration and cleanup.
 - For class-loader-sensitive changes, verify that stopped/unloaded plugins are not retained by host
   registries or static caches.
-- Keep sample applications minimal; reusable test infrastructure belongs in `pm-pf4j-test`.
+- Keep sample applications minimal; reusable test infrastructure belongs in `pm-pf4j-testkit`.
 
 ## Git and Release Rules
 
