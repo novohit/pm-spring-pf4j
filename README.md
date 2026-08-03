@@ -25,6 +25,7 @@ pm-spring-pf4j
 ├── pm-pf4j-webmvc               Dynamic MVC controllers and OpenAPI integration
 ├── pm-pf4j-mybatis              Plugin mapper and SqlSession integration
 ├── pm-pf4j-jpa                  Plugin EntityManager and repository integration
+├── pm-pf4j-security             Plugin authentication and security filter-chain extensions
 ├── pm-pf4j-test                 Reusable plugin integration-test support
 └── pm-pf4j-sample
     ├── sample-host              Minimal Spring Boot host
@@ -36,6 +37,8 @@ projects should depend on `pm-pf4j-core` and only the integration APIs they use;
 normally consume `pm-pf4j-spring-boot-starter`.
 
 See [Plugin Extensions](docs/plugin-extensions.md) for the three supported integration styles.
+See [Plugin authentication](docs/plugin-authentication.md) for custom authentication providers and security filter
+extension slots.
 
 ## Build
 

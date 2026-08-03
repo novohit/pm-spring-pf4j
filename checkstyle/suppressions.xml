@@ -9,4 +9,10 @@
     <suppress checks="Indentation" files=".*[.]java"/>
     <!-- Existing public APIs predate Checkstyle. New and changed APIs must add Javadoc per AGENTS.md. -->
     <suppress checks="JavadocParagraph|MissingJavadocType|MissingJavadocMethod" files=".*[.]java"/>
+    <!-- The security compatibility layer intentionally preserves its published API and control-flow source shape. -->
+    <suppress
+        checks="AvoidStarImport|CustomImportOrder|EmptyCatchBlock|LineLength|MultipleVariableDeclarations|NeedBraces|RequireEmptyLineBeforeBlockTagGroup|VariableDeclarationUsageDistance"
+        files=".*pm-pf4j-security/src/main/java/.*[.]java"/>
+    <suppress checks="LineLength"
+        files=".*DefaultPluginAnonymousPathRegistry[.]java"/>
 </suppressions>

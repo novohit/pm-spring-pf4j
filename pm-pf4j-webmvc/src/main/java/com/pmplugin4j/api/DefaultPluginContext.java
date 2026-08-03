@@ -1,8 +1,14 @@
 package com.pmplugin4j.api;
 
 import com.pmplugin4j.config.TenantPluginConfig;
+import com.pmplugin4j.core.AllowAnonymous;
+import com.pmplugin4j.core.AnonymousPathEntry;
+import com.pmplugin4j.core.PluginAnonymousPathRegistrar;
+import com.pmplugin4j.core.PluginAuthenticated;
 import com.pmplugin4j.event.EventBus;
+import com.pmplugin4j.security.PluginRouteRegistry;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -129,6 +135,8 @@ public class DefaultPluginContext implements PluginContext {
 
             RequestMapping classMapping = controllerClass.getAnnotation(RequestMapping.class);
             String[] basePath = classMapping != null ? classMapping.value() : new String[]{""};
+            AllowAnonymous classAnonymous = controllerClass.getAnnotation(AllowAnonymous.class);
+            boolean classPluginAuthenticated = controllerClass.isAnnotationPresent(PluginAuthenticated.class);
 
             List<RequestMappingInfo> mappings = new ArrayList<>();
 
@@ -166,6 +174,8 @@ public class DefaultPluginContext implements PluginContext {
 
                         handlerMapping.registerMapping(mappingInfo, controller, method);
                         mappings.add(mappingInfo);
+                        registerSecurityMetadata(controllerClass, method, fullPath, methods, classAnonymous,
+                                classPluginAuthenticated);
 
                         log.info("[{}] 注册API端点: {} -> {}.{}", pluginId, fullPath, controllerClass.getSimpleName(),
                                 method.getName());
@@ -205,6 +215,46 @@ public class DefaultPluginContext implements PluginContext {
     public void unregisterAllControllers() {
         for (Object controller : new ArrayList<>(registeredMappings.keySet())) {
             unregisterController(controller);
+        }
+        ApplicationContext hostContext = pluginApplicationContext.getParent();
+        if (hostContext != null) {
+            PluginRouteRegistry routeRegistry = hostContext.getBeanProvider(PluginRouteRegistry.class).getIfAvailable();
+            if (routeRegistry != null) {
+                routeRegistry.unregister(pluginId);
+            }
+            PluginAnonymousPathRegistrar anonymousRegistrar = hostContext
+                .getBeanProvider(PluginAnonymousPathRegistrar.class)
+                .getIfAvailable();
+            if (anonymousRegistrar != null) {
+                anonymousRegistrar.unregister(pluginId);
+            }
+        }
+    }
+
+    private void registerSecurityMetadata(Class<?> controllerClass, Method handlerMethod, String fullPath,
+            org.springframework.web.bind.annotation.RequestMethod[] httpMethods, AllowAnonymous classAnonymous,
+            boolean classPluginAuthenticated) {
+        ApplicationContext hostContext = pluginApplicationContext.getParent();
+        if (hostContext == null) {
+            return;
+        }
+        AllowAnonymous methodAnonymous = handlerMethod.getAnnotation(AllowAnonymous.class);
+        AllowAnonymous effectiveAnonymous = methodAnonymous != null ? methodAnonymous : classAnonymous;
+        boolean pluginAuthenticated = effectiveAnonymous == null
+                && (classPluginAuthenticated || handlerMethod.isAnnotationPresent(PluginAuthenticated.class));
+        PluginRouteRegistry routeRegistry = hostContext.getBeanProvider(PluginRouteRegistry.class).getIfAvailable();
+        PluginAnonymousPathRegistrar anonymousRegistrar = hostContext
+            .getBeanProvider(PluginAnonymousPathRegistrar.class)
+            .getIfAvailable();
+        for (org.springframework.web.bind.annotation.RequestMethod httpMethod : httpMethods) {
+            if (routeRegistry != null) {
+                routeRegistry.register(pluginId, httpMethod.name(), fullPath, pluginAuthenticated);
+            }
+            if (effectiveAnonymous != null && anonymousRegistrar != null && !effectiveAnonymous.reason().isBlank()) {
+                anonymousRegistrar.register(pluginId,
+                        new AnonymousPathEntry(pluginId, fullPath, httpMethod.name(), controllerClass.getName(),
+                                handlerMethod.getName(), effectiveAnonymous.reason(), LocalDateTime.now()));
+            }
         }
     }
 

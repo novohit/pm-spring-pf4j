@@ -48,6 +48,7 @@ these hooks to commit formatting, Checkstyle, or Conventional Commit violations.
 | `pm-pf4j-webmvc` | Dynamic MVC controller registration/removal and OpenAPI integration |
 | `pm-pf4j-mybatis` | Plugin-owned MyBatis mapper and SqlSession resources |
 | `pm-pf4j-jpa` | Plugin-owned JPA EntityManager and repository resources |
+| `pm-pf4j-security` | Plugin authentication providers, security-chain orchestration, and Servlet/WebFlux filter extension slots |
 | `pm-pf4j-spring-boot-starter` | Auto-configuration, plugin managers, host context integration, and configuration properties |
 | `pm-pf4j-test` | Reusable host/plugin lifecycle testing support |
 | `pm-pf4j-sample` | Example host and plugin; never publish these artifacts to Maven Central |
@@ -66,6 +67,8 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
 - Host applications may expose services to plugins through explicit APIs; plugin internals must not
   leak into the host context.
 - MyBatis and JPA integrations are independent optional modules. A host may enable either or both.
+- Security integrations must preserve host-controlled authorization, deterministic plugin cleanup,
+  and the six host-authorized filter extension positions around the framework authentication slot.
 - Every dynamically registered resource must have a matching deterministic removal path.
 
 ## Spring and Compatibility Rules

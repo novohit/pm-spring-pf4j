@@ -42,6 +42,7 @@
         <module>pm-pf4j-webmvc</module>
         <module>pm-pf4j-mybatis</module>
         <module>pm-pf4j-jpa</module>
+        <module>pm-pf4j-security</module>
         <module>pm-pf4j-spring-boot-starter</module>
         <module>pm-pf4j-test</module>
         <module>pm-pf4j-sample</module>
@@ -104,6 +105,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>pm-pf4j-jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>pm-pf4j-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
