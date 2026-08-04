@@ -29,9 +29,18 @@ pm-spring-pf4j
 ├── pm-pf4j-testing/             Reusable plugin testing support
 ├── pm-pf4j-integration-tests    Cross-module runtime verification
 └── pm-pf4j-samples/
-    ├── sample-host-webmvc       Spring MVC host with a MongoDB resource bridge
-    └── sample-plugin-data       Dynamic web plugin consuming the MongoDB bridge
+    ├── sample-host-webmvc       MVC host with MongoDB and plugin Security integration
+    ├── sample-host-webflux      Reactive host with plugin Security integration
+    ├── sample-plugin-basic      Minimal controller plugin
+    ├── sample-plugin-data       Dynamic web plugin consuming the MongoDB bridge
+    └── sample-plugin-security   Header-authenticated plugin
 ```
+
+Both hosts demonstrate host-owned authorization with plugin-provided authentication. Build and copy
+`sample-plugin-security` into the host's `plugins/` directory, then call
+`GET /sample-security/hello` with `X-Plugin-Token: sample-token`. Requests without the header receive
+`401 Unauthorized`. The MVC host additionally demonstrates an isolated MongoDB resource bridge with
+`sample-plugin-data`.
 
 The modules intentionally separate the plugin contract from optional host integrations. Plugin
 projects should depend on `pm-pf4j-core` and only the integration APIs they use; host applications

@@ -1,13 +1,6 @@
-server:
-  port: 8080
-
 spring:
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/pm_pf4j_sample
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  main:
+    web-application-type: reactive
 
 pm:
   pf4j:
@@ -16,7 +9,7 @@ pm:
     tenants:
       sample:
         enabled-plugins:
-          - com.pmplugin4j.sample.plugin
+          - com.pmplugin4j.sample.basic
           - com.pmplugin4j.sample.security
     security:
       filter:

@@ -283,7 +283,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
-                            <excludeArtifacts>pm-pf4j-integration-tests,pm-pf4j-samples,sample-host-webmvc,sample-plugin-data</excludeArtifacts>
+                            <excludeArtifacts>pm-pf4j-integration-tests,pm-pf4j-samples,sample-host-webmvc,sample-host-webflux,sample-plugin-basic,sample-plugin-data,sample-plugin-security</excludeArtifacts>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
                         </configuration>
