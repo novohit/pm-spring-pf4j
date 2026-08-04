@@ -28,6 +28,7 @@ pm-spring-pf4j
 ├── pm-pf4j-security/            Core, MVC, and WebFlux security integrations
 ├── pm-pf4j-testing/             Reusable plugin testing support
 ├── pm-pf4j-integration-tests    Cross-module runtime verification
+├── pm-pf4j-archetype            Minimal plugin Maven project generator
 └── pm-pf4j-samples/
     ├── sample-host-webmvc       MVC host with MongoDB and plugin Security integration
     ├── sample-host-webflux      Reactive host with plugin Security integration
@@ -62,14 +63,45 @@ Published artifacts use the Maven group `io.github.novohit`. Java packages remai
 `com.pmplugin4j`.
 
 ```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.novohit</groupId>
+            <artifactId>pm-pf4j-bom</artifactId>
+            <version>0.1.0-alpha.1</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
 <dependency>
     <groupId>io.github.novohit</groupId>
     <artifactId>pm-pf4j-spring-boot-starter</artifactId>
-    <version>0.1.0-alpha.1</version>
 </dependency>
+</dependencies>
 ```
 
 Pre-release versions are intended for evaluation while the public API is evolving.
+
+## Generate a plugin
+
+After the archetype is available from Maven Central or installed locally, generate a minimal Java 21 plugin with:
+
+```bash
+mvn archetype:generate -B \
+  -DarchetypeGroupId=io.github.novohit \
+  -DarchetypeArtifactId=pm-pf4j-archetype \
+  -DarchetypeVersion=0.1.0-alpha.1 \
+  -DgroupId=com.example \
+  -DartifactId=example-plugin \
+  -Dversion=1.0.0 \
+  -Dpackage=com.example.plugin
+```
+
+The generated JAR contains `Plugin-Id`, `Plugin-Class`, and `Plugin-Version` manifest entries and keeps framework
+dependencies in `provided` scope.
 
 ## Migration provenance
 
@@ -83,9 +115,6 @@ Commit hashes changed because the original repository paths and parent trees wer
 
 ## Roadmap
 
-1. Make the extracted module build independently.
-2. Introduce an ordered plugin resource lifecycle engine.
-3. Align child-context creation and cleanup with PF4J start/stop semantics.
-4. Add rollback for partial plugin startup failures.
-5. Add restart, unload, and class-loader leak integration tests.
-6. Split optional integrations into focused modules after the core API stabilizes.
+1. Expand restart, unload, and class-loader leak integration coverage.
+2. Add more reusable infrastructure Registrar modules as demand emerges.
+3. Stabilize the public API through pre-release feedback.

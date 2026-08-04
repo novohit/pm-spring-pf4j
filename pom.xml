@@ -46,6 +46,7 @@
         <module>pm-pf4j-spring-boot</module>
         <module>pm-pf4j-testing</module>
         <module>pm-pf4j-integration-tests</module>
+        <module>pm-pf4j-archetype</module>
         <module>pm-pf4j-samples</module>
     </modules>
 

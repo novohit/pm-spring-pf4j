@@ -57,6 +57,7 @@ these hooks to commit formatting, Checkstyle, or Conventional Commit violations.
 | `pm-pf4j-spring-boot/pm-pf4j-spring-boot-starter` | Dependency-only entry point for Spring Boot hosts |
 | `pm-pf4j-testing/pm-pf4j-testkit` | Reusable host/plugin lifecycle testing support |
 | `pm-pf4j-integration-tests` | Non-published cross-module runtime and auto-configuration verification |
+| `pm-pf4j-archetype` | Maven project generator for a minimal plugin |
 | `pm-pf4j-samples` | Example hosts and plugins; never publish these artifacts to Maven Central |
 
 Keep optional framework integrations out of `pm-pf4j-core`. The core module must not depend on
