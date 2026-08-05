@@ -51,14 +51,4 @@ public interface PluginContext {
      */
     <T> void unsubscribeEvent(Class<T> eventType, EventBus.EventListener<T> listener);
 
-    /**
-     * 注册Controller到Spring MVC
-     */
-    void registerController(Object controller);
-
-    /**
-     * 注销Controller
-     */
-    void unregisterController(Object controller);
-
 }

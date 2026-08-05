@@ -1,0 +1,3 @@
+com.pmplugin4j.security.PmSecurityAutoConfiguration
+com.pmplugin4j.security.PmSecurityWebMvcAutoConfiguration
+com.pmplugin4j.security.PmSecurityWebFluxAutoConfiguration

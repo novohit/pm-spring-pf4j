@@ -1,0 +1,3 @@
+com.pmplugin4j.config.PmPluginWebAutoConfiguration
+com.pmplugin4j.webmvc.PmPluginWebMvcConfig
+com.pmplugin4j.webflux.PmPluginWebFluxConfig

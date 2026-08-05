@@ -32,7 +32,7 @@
 ```xml
 <dependency>
     <groupId>io.github.novohit</groupId>
-    <artifactId>pm-pf4j-security-webmvc</artifactId>
+    <artifactId>pm-pf4j-security</artifactId>
     <version>${pm-spring-pf4j.version}</version>
 </dependency>
 ```
@@ -42,7 +42,7 @@
 ```xml
 <dependency>
     <groupId>io.github.novohit</groupId>
-    <artifactId>pm-pf4j-security-core</artifactId>
+    <artifactId>pm-pf4j-security</artifactId>
     <version>${pm-spring-pf4j.version}</version>
     <scope>provided</scope>
 </dependency>

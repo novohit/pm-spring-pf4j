@@ -2,8 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent><groupId>io.github.novohit</groupId><artifactId>pm-spring-pf4j</artifactId><version>0.1.0-alpha.1</version><relativePath>../pom.xml</relativePath></parent>
-    <artifactId>pm-pf4j-web</artifactId><packaging>pom</packaging>
+    <artifactId>pm-pf4j-web</artifactId>
     <name>PM PF4J Web</name>
-    <properties><maven.deploy.skip>true</maven.deploy.skip></properties>
-    <modules><module>pm-pf4j-webmvc</module><module>pm-pf4j-webflux</module></modules>
+    <description>Unified dynamic Spring MVC and WebFlux routing for PF4J plugins</description>
+    <dependencies>
+        <dependency><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-core</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-autoconfigure</artifactId></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-webmvc</artifactId></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-webflux</artifactId></dependency>
+        <dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-api</artifactId><optional>true</optional></dependency>
+        <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
+        <dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><optional>true</optional></dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><scope>test</scope></dependency>
+    </dependencies>
 </project>

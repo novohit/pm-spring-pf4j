@@ -91,17 +91,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>pm-pf4j-webflux</artifactId>
+                <artifactId>pm-pf4j-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>pm-pf4j-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>pm-pf4j-webmvc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -116,17 +111,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>pm-pf4j-security-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>pm-pf4j-security-webmvc</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>pm-pf4j-security-webflux</artifactId>
+                <artifactId>pm-pf4j-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

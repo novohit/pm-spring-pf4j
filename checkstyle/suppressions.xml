@@ -18,5 +18,5 @@
     <!-- The WebFlux routing DSL preserves Spring's uppercase HTTP method API and mechanically migrated source shape. -->
     <suppress
         checks="AbbreviationAsWordInName|AvoidStarImport|CustomImportOrder|MethodName|NeedBraces"
-        files=".*pm-pf4j-webflux/src/main/java/com/pmplugin4j/webflux/(PmRouterFunctions|PmPluginWebFluxDefaultRouterFunctionRegistry|PmPluginWebFluxRequestMappingHandlerMapping|PmPluginWebFluxRouterFunctionRegistry)[.]java"/>
+        files=".*pm-pf4j-web/src/main/java/com/pmplugin4j/webflux/(PmRouterFunctions|PmPluginWebFluxDefaultRouterFunctionRegistry|PmPluginWebFluxRequestMappingHandlerMapping|PmPluginWebFluxRouterFunctionRegistry)[.]java"/>
 </suppressions>

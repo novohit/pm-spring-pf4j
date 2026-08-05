@@ -46,13 +46,10 @@ these hooks to commit formatting, Checkstyle, or Conventional Commit violations.
 |---|---|
 | `pm-pf4j-bom` | Version alignment for all published PM PF4J artifacts |
 | `pm-pf4j-core` | Public plugin API, lifecycle engine, events, configuration model, and resource registrar SPI |
-| `pm-pf4j-web/pm-pf4j-webmvc` | Dynamic MVC controller registration/removal and OpenAPI integration |
-| `pm-pf4j-web/pm-pf4j-webflux` | Dynamic annotated and functional WebFlux route registration/removal |
+| `pm-pf4j-web` | Unified MVC/WebFlux route lifecycle, functional routing, anonymous paths, and OpenAPI integration |
 | `pm-pf4j-data/pm-pf4j-mybatis` | Plugin-owned MyBatis mapper and SqlSession resources |
 | `pm-pf4j-data/pm-pf4j-jpa` | Plugin-owned JPA EntityManager and repository resources |
-| `pm-pf4j-security/pm-pf4j-security-core` | Plugin authentication providers, chain strategies, events, and shared registries |
-| `pm-pf4j-security/pm-pf4j-security-webmvc` | Servlet security-chain and filter extension integration |
-| `pm-pf4j-security/pm-pf4j-security-webflux` | Reactive security-chain and WebFilter extension integration |
+| `pm-pf4j-security` | Unified authentication orchestration and conditional Servlet/Reactive six-slot filter integration |
 | `pm-pf4j-spring-boot/pm-pf4j-spring-boot-autoconfigure` | Auto-configuration, plugin managers, host context integration, and configuration properties |
 | `pm-pf4j-spring-boot/pm-pf4j-spring-boot-starter` | Dependency-only entry point for Spring Boot hosts |
 | `pm-pf4j-testing/pm-pf4j-testkit` | Reusable host/plugin lifecycle testing support |
@@ -76,6 +73,10 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
 - MyBatis and JPA integrations are independent optional modules. A host may enable either or both.
 - Security integrations must preserve host-controlled authorization, deterministic plugin cleanup,
   and the six host-authorized filter extension positions around the framework authentication slot.
+- Servlet and reactive Security adapters share one artifact; web application conditions must ensure
+  that only the active stack creates filters and stack-specific registrars.
+- MVC and WebFlux routing share one `ControllerRegistrar`; WebFlux detection has priority and the
+  selected stack must be used symmetrically for registration and cleanup.
 - Every dynamically registered resource must have a matching deterministic removal path.
 
 ## Spring and Compatibility Rules

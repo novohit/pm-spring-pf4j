@@ -20,13 +20,10 @@ The first production baseline must provide:
 ```text
 pm-pf4j-bom                                      published artifact version alignment
 pm-pf4j-core                                     public plugin API and lifecycle SPI
-pm-pf4j-web/pm-pf4j-webmvc                       MVC route registration and OpenAPI
-pm-pf4j-web/pm-pf4j-webflux                      reactive annotated and functional routing
+pm-pf4j-web                                      unified MVC/WebFlux routing and OpenAPI
 pm-pf4j-data/pm-pf4j-mybatis                     per-plugin MyBatis-Plus infrastructure
 pm-pf4j-data/pm-pf4j-jpa                         per-plugin JPA/Hibernate infrastructure
-pm-pf4j-security/pm-pf4j-security-core           shared authentication orchestration
-pm-pf4j-security/pm-pf4j-security-webmvc         servlet filter extension slots
-pm-pf4j-security/pm-pf4j-security-webflux        reactive WebFilter extension slots
+pm-pf4j-security                                 unified authentication and conditional filter stacks
 pm-pf4j-spring-boot/pm-pf4j-spring-boot-autoconfigure
                                                    host bootstrap and PF4J manager
 pm-pf4j-spring-boot/pm-pf4j-spring-boot-starter dependency-only host entry point
@@ -38,6 +35,11 @@ pm-pf4j-samples                                  executable hosts and example pl
 Optional integrations depend on `core`; `core` never depends on an integration. The starter
 composes registrars discovered as host Spring beans. Plugin code depends on `core` plus only the
 APIs it uses.
+
+MVC and WebFlux intentionally share one web artifact and one controller lifecycle registrar. The
+registrar detects WebFlux first and otherwise falls back to MVC, then uses the same selected branch
+for deterministic route removal. This keeps annotated controllers, functional routes, anonymous
+paths, and authentication route ownership in one ordered lifecycle.
 
 ## Plugin context lifecycle
 

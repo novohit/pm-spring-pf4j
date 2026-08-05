@@ -3,10 +3,11 @@ package com.pmplugin4j.factory;
 import com.pmplugin4j.api.PmPlugin;
 import com.pmplugin4j.api.PmSpringPlugin;
 import com.pmplugin4j.config.PluginProperties;
+import com.pmplugin4j.lifecycle.AnonymousPathRegistrar;
+import com.pmplugin4j.lifecycle.ControllerRegistrar;
 import com.pmplugin4j.lifecycle.PluginResourceRegistrar;
 import com.pmplugin4j.mybatis.PluginMybatisRegistrar;
 import com.pmplugin4j.webmvc.PluginOpenApiRegistrar;
-import com.pmplugin4j.webmvc.PluginWebMvcRegistrar;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -41,7 +42,8 @@ public final class PmPluginFactory implements PluginFactory {
             }
             PmPlugin businessPlugin = instantiate(pluginClass, wrapper);
             return new PmSpringPlugin(wrapper, businessPlugin, hostApplicationContext, pluginProperties,
-                    List.of(new PluginMybatisRegistrar(), new PluginWebMvcRegistrar(), new PluginOpenApiRegistrar()),
+                    List.of(new PluginMybatisRegistrar(), new ControllerRegistrar(), new PluginOpenApiRegistrar(),
+                            new AnonymousPathRegistrar()),
                     programmaticRegistrars);
         } catch (Exception exception) {
             throw new IllegalStateException("Failed to instantiate plugin " + wrapper.getPluginId(), exception);
