@@ -63,6 +63,10 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
 ## Architecture Invariants
 
 - Maintain one child `ApplicationContext` per loaded plugin.
+- Use `plugin.properties` as the canonical plugin descriptor; Manifest descriptors remain a compatibility fallback.
+- Discover versioned plugins from `plugins/<plugin.id>/<plugin.id>-<version>.jar` and select the latest version.
+- Apply tenant configuration after PF4J discovery and dependency resolution: tenants select startup roots, while required
+  plugin dependencies retain PF4J's recursive startup semantics.
 - Treat plugin start as transactional: if a registrar fails, roll back resources already registered.
 - Stop and unload resources in reverse registration order.
 - Registration and cleanup operations must be idempotent where practical.

@@ -10,5 +10,5 @@
         <dependency><groupId>org.springframework</groupId><artifactId>spring-web</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><scope>provided</scope></dependency>
     </dependencies>
-    <build><plugins><plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.4.2</version><configuration><archive><manifestEntries><Plugin-Id>com.pmplugin4j.sample.security</Plugin-Id><Plugin-Class>com.pmplugin4j.sample.security.SecurityPlugin</Plugin-Class><Plugin-Version>${project.version}</Plugin-Version></manifestEntries></archive></configuration></plugin></plugins></build>
+    <build><resources><resource><directory>src/main/resources</directory><filtering>true</filtering></resource></resources></build>
 </project>

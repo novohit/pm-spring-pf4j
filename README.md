@@ -38,7 +38,7 @@ pm-spring-pf4j
 ```
 
 Both hosts demonstrate host-owned authorization with plugin-provided authentication. Build and copy
-`sample-plugin-security` into the host's `plugins/` directory, then call
+`sample-plugin-security` into `plugins/com.pmplugin4j.sample.security/`, then call
 `GET /sample-security/hello` with `X-Plugin-Token: sample-token`. Requests without the header receive
 `401 Unauthorized`. The MVC host additionally demonstrates an isolated MongoDB resource bridge with
 `sample-plugin-data`.
@@ -100,8 +100,29 @@ mvn archetype:generate -B \
   -Dpackage=com.example.plugin
 ```
 
-The generated JAR contains `Plugin-Id`, `Plugin-Class`, and `Plugin-Version` manifest entries and keeps framework
-dependencies in `provided` scope.
+The generated JAR contains a standard PF4J `plugin.properties` descriptor and keeps framework dependencies in
+`provided` scope. Deploy plugins under the host's configured plugin directory and enable their `plugin.id` for the
+current tenant.
+
+Each plugin uses its own directory. Multiple versions may coexist; the runtime selects the latest version:
+
+```text
+plugins/
+└── com.example.plugin/
+    ├── com.example.plugin-1.0.0.jar
+    └── com.example.plugin-1.1.0.jar
+```
+
+The plugin JAR declares its identity and startup metadata in `src/main/resources/plugin.properties`:
+
+```properties
+plugin.id=com.example.plugin
+plugin.class=com.example.plugin.Plugin
+plugin.version=1.1.0
+plugin.provider=example
+plugin.dependencies=
+plugin.order=100000
+```
 
 ## Migration provenance
 

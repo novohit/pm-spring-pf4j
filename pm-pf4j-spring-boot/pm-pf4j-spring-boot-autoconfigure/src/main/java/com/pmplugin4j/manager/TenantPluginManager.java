@@ -4,9 +4,6 @@ import com.pmplugin4j.config.PluginProperties;
 import com.pmplugin4j.config.TenantPluginConfig;
 import com.pmplugin4j.factory.PmPluginFactory;
 import com.pmplugin4j.lifecycle.PluginResourceRegistrar;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
@@ -78,8 +73,8 @@ public class TenantPluginManager {
         // 创建PF4J PluginManager，使用自定义PluginFactory
         registrarsFrozen = true;
         pluginFactory = new PmPluginFactory(applicationContext, pluginProperties, List.copyOf(externalRegistrars));
-        PmJarPluginManager.setPendingFactory(pluginFactory);
-        pf4jManager = new PmJarPluginManager(pluginFactory);
+        Path pluginsDir = Paths.get(pluginProperties.getDirectory()).toAbsolutePath().normalize();
+        pf4jManager = new PmJarPluginManager(pluginsDir, pluginFactory);
 
         // 加载当前租户的插件
         loadTenantPlugins(currentTenantId);
@@ -104,22 +99,22 @@ public class TenantPluginManager {
 
         log.info("Loading plugins for tenant {}: {}", tenantId, enabledPlugins);
 
-        // 扫描插件目录
-        Path pluginsDir = Paths.get(pluginProperties.getDirectory());
+        Path pluginsDir = Paths.get(pluginProperties.getDirectory()).toAbsolutePath().normalize();
         if (!Files.exists(pluginsDir)) {
             log.warn("Plugins directory not found: {}", pluginsDir);
             return;
         }
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(pluginsDir, "*.jar")) {
-            for (Path jarPath : stream) {
-                String pluginId = extractPluginId(jarPath);
-                if (pluginId != null && enabledPlugins.contains(pluginId)) {
-                    loadAndStartPlugin(jarPath, pluginId);
-                }
+        pf4jManager.loadPlugins();
+        ((PmJarPluginManager) pf4jManager).startPlugins(enabledPlugins);
+        for (String pluginId : enabledPlugins) {
+            PluginWrapper wrapper = pf4jManager.getPlugin(pluginId);
+            if (wrapper == null) {
+                log.warn("Enabled plugin not found for tenant {}: {}", tenantId, pluginId);
+                continue;
             }
-        } catch (IOException e) {
-            log.error("Failed to scan plugins directory", e);
+            loadedPlugins.put(pluginId, wrapper);
+            log.info("Plugin loaded and started: {}", pluginId);
         }
     }
 
@@ -146,26 +141,6 @@ public class TenantPluginManager {
         }
 
         return Collections.emptyList();
-    }
-
-    /**
-     * 从JAR文件中提取插件ID
-     */
-    private String extractPluginId(Path jarPath) {
-        try (JarFile jarFile = new JarFile(jarPath.toFile())) {
-            // 尝试从MANIFEST.MF获取
-            ZipEntry manifest = jarFile.getEntry("META-INF/MANIFEST.MF");
-            if (manifest != null) {
-                try (InputStream is = jarFile.getInputStream(manifest)) {
-                    java.util.Properties props = new java.util.Properties();
-                    props.load(is);
-                    return props.getProperty("Plugin-Id");
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to extract plugin id from: {}", jarPath, e);
-        }
-        return null;
     }
 
     /**
