@@ -15,6 +15,9 @@
         files=".*pm-pf4j-security.*/src/main/java/.*[.]java"/>
     <suppress checks="LineLength"
         files=".*DefaultPluginAnonymousPathRegistry[.]java"/>
+    <!-- Preserve the mechanically migrated runtime repository control-flow source shape. -->
+    <suppress checks="NeedBraces"
+        files=".*PmJarPluginRepository[.]java"/>
     <!-- The WebFlux routing DSL preserves Spring's uppercase HTTP method API and mechanically migrated source shape. -->
     <suppress
         checks="AbbreviationAsWordInName|AvoidStarImport|CustomImportOrder|MethodName|NeedBraces"

@@ -22,6 +22,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>pm-pf4j-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>pm-pf4j-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -38,11 +43,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>pm-pf4j-security</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>pm-pf4j-spring-boot-autoconfigure</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

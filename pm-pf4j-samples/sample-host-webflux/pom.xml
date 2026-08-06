@@ -6,7 +6,7 @@
     <name>PM PF4J Sample Host WebFlux</name>
     <dependencies>
         <dependency>
-            <groupId>io.github.novohit</groupId><artifactId>pm-pf4j-spring-boot-autoconfigure</artifactId>
+            <groupId>io.github.novohit</groupId><artifactId>pm-pf4j-spring-boot-starter</artifactId>
             <exclusions><exclusion><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></exclusion></exclusions>
         </dependency>
         <dependency><groupId>io.github.novohit</groupId><artifactId>pm-pf4j-web</artifactId></dependency>

@@ -22,11 +22,13 @@ Initial scope:
 pm-spring-pf4j
 ├── pm-pf4j-bom                  Published dependency version alignment
 ├── pm-pf4j-core                 Plugin API, events, SPI, shared configuration model
-├── pm-pf4j-spring-boot/         Auto-configuration and dependency starter modules
-├── pm-pf4j-web/                 MVC and WebFlux integration modules
-├── pm-pf4j-data/                MyBatis and JPA integration modules
-├── pm-pf4j-security/            Core, MVC, and WebFlux security integrations
-├── pm-pf4j-testing/             Reusable plugin testing support
+├── pm-pf4j-runtime              PF4J descriptors, repository, and runtime manager
+├── pm-pf4j-spring-boot-starter  Auto-configuration and host dependency entry point
+├── pm-pf4j-web                  MVC and WebFlux integration
+├── pm-pf4j-security             MVC and WebFlux security integration
+├── pm-pf4j-mybatis              Optional MyBatis integration
+├── pm-pf4j-jpa                  Optional JPA integration
+├── pm-pf4j-testkit              Reusable plugin testing support
 ├── pm-pf4j-integration-tests    Cross-module runtime verification
 ├── pm-pf4j-archetype            Minimal plugin Maven project generator
 └── pm-pf4j-samples/

@@ -40,11 +40,13 @@
     <modules>
         <module>pm-pf4j-bom</module>
         <module>pm-pf4j-core</module>
+        <module>pm-pf4j-runtime</module>
         <module>pm-pf4j-web</module>
-        <module>pm-pf4j-data</module>
+        <module>pm-pf4j-mybatis</module>
+        <module>pm-pf4j-jpa</module>
         <module>pm-pf4j-security</module>
-        <module>pm-pf4j-spring-boot</module>
-        <module>pm-pf4j-testing</module>
+        <module>pm-pf4j-spring-boot-starter</module>
+        <module>pm-pf4j-testkit</module>
         <module>pm-pf4j-integration-tests</module>
         <module>pm-pf4j-archetype</module>
         <module>pm-pf4j-samples</module>
@@ -101,6 +103,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>pm-pf4j-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>pm-pf4j-mybatis</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -112,11 +119,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>pm-pf4j-security</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>pm-pf4j-spring-boot-autoconfigure</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

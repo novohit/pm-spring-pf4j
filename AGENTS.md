@@ -46,13 +46,13 @@ these hooks to commit formatting, Checkstyle, or Conventional Commit violations.
 |---|---|
 | `pm-pf4j-bom` | Version alignment for all published PM PF4J artifacts |
 | `pm-pf4j-core` | Public plugin API, lifecycle engine, events, configuration model, and resource registrar SPI |
+| `pm-pf4j-runtime` | PF4J descriptors, versioned repository discovery, and low-level plugin manager runtime |
 | `pm-pf4j-web` | Unified MVC/WebFlux route lifecycle, functional routing, anonymous paths, and OpenAPI integration |
-| `pm-pf4j-data/pm-pf4j-mybatis` | Plugin-owned MyBatis mapper and SqlSession resources |
-| `pm-pf4j-data/pm-pf4j-jpa` | Plugin-owned JPA EntityManager and repository resources |
+| `pm-pf4j-mybatis` | Plugin-owned MyBatis mapper and SqlSession resources |
+| `pm-pf4j-jpa` | Plugin-owned JPA EntityManager and repository resources |
 | `pm-pf4j-security` | Unified authentication orchestration and conditional Servlet/Reactive six-slot filter integration |
-| `pm-pf4j-spring-boot/pm-pf4j-spring-boot-autoconfigure` | Auto-configuration, plugin managers, host context integration, and configuration properties |
-| `pm-pf4j-spring-boot/pm-pf4j-spring-boot-starter` | Dependency-only entry point for Spring Boot hosts |
-| `pm-pf4j-testing/pm-pf4j-testkit` | Reusable host/plugin lifecycle testing support |
+| `pm-pf4j-spring-boot-starter` | Auto-configuration, tenant orchestration, host context integration, and dependency entry point |
+| `pm-pf4j-testkit` | Reusable host/plugin lifecycle testing support |
 | `pm-pf4j-integration-tests` | Non-published cross-module runtime and auto-configuration verification |
 | `pm-pf4j-archetype` | Maven project generator for a minimal plugin |
 | `pm-pf4j-samples` | Example hosts and plugins; never publish these artifacts to Maven Central |

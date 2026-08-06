@@ -20,14 +20,13 @@ The first production baseline must provide:
 ```text
 pm-pf4j-bom                                      published artifact version alignment
 pm-pf4j-core                                     public plugin API and lifecycle SPI
+pm-pf4j-runtime                                  descriptor, repository, and PF4J runtime
 pm-pf4j-web                                      unified MVC/WebFlux routing and OpenAPI
-pm-pf4j-data/pm-pf4j-mybatis                     per-plugin MyBatis-Plus infrastructure
-pm-pf4j-data/pm-pf4j-jpa                         per-plugin JPA/Hibernate infrastructure
+pm-pf4j-mybatis                                  per-plugin MyBatis-Plus infrastructure
+pm-pf4j-jpa                                      per-plugin JPA/Hibernate infrastructure
 pm-pf4j-security                                 unified authentication and conditional filter stacks
-pm-pf4j-spring-boot/pm-pf4j-spring-boot-autoconfigure
-                                                   host bootstrap and PF4J manager
-pm-pf4j-spring-boot/pm-pf4j-spring-boot-starter dependency-only host entry point
-pm-pf4j-testing/pm-pf4j-testkit                  reusable lifecycle test support
+pm-pf4j-spring-boot-starter                      host bootstrap and dependency entry point
+pm-pf4j-testkit                                  reusable lifecycle test support
 pm-pf4j-integration-tests                        cross-module runtime verification
 pm-pf4j-samples                                  executable hosts and example plugins
 ```
