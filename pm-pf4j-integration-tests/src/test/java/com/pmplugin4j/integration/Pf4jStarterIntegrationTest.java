@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.pmplugin4j.config.Pf4jPluginAutoConfiguration;
 import com.pmplugin4j.event.EventBus;
+import com.pmplugin4j.manager.PmPluginBootstrap;
 import com.pmplugin4j.manager.PmPluginManager;
 import com.pmplugin4j.registry.SpiRegistry;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ class Pf4jStarterIntegrationTest {
     void starterProvidesHostRuntimeBeansByDefault() {
         contextRunner.run(context -> {
             assertThat(context).hasSingleBean(PmPluginManager.class);
+            assertThat(context).hasSingleBean(PmPluginBootstrap.class);
             assertThat(context).hasSingleBean(SpiRegistry.class);
             assertThat(context).hasSingleBean(EventBus.class);
         });
@@ -28,6 +30,7 @@ class Pf4jStarterIntegrationTest {
     void starterCanBeDisabledWithConfigurationProperty() {
         contextRunner.withPropertyValues("pm.pf4j.enabled=false").run(context -> {
             assertThat(context).doesNotHaveBean(PmPluginManager.class);
+            assertThat(context).doesNotHaveBean(PmPluginBootstrap.class);
             assertThat(context).doesNotHaveBean(SpiRegistry.class);
             assertThat(context).doesNotHaveBean(EventBus.class);
         });

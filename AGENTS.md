@@ -67,6 +67,8 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
 - Discover versioned plugins from `plugins/<plugin.id>/<plugin.id>-<version>.jar` and select the latest version.
 - Apply tenant configuration after PF4J discovery and dependency resolution: tenants select startup roots, while required
   plugin dependencies retain PF4J's recursive startup semantics.
+- Keep `PmPluginManager` as the single lifecycle and state authority. Multi-tenant support belongs in
+  `TenantPluginSelector` and `PmPluginBootstrap`; tenant orchestration must not duplicate plugin state or lifecycle APIs.
 - Treat plugin start as transactional: if a registrar fails, roll back resources already registered.
 - Stop and unload resources in reverse registration order.
 - Registration and cleanup operations must be idempotent where practical.

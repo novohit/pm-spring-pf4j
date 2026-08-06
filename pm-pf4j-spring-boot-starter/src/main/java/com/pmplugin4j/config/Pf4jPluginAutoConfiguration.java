@@ -2,7 +2,9 @@ package com.pmplugin4j.config;
 
 import com.pmplugin4j.event.DefaultEventBus;
 import com.pmplugin4j.event.EventBus;
+import com.pmplugin4j.manager.PmPluginBootstrap;
 import com.pmplugin4j.manager.PmPluginManager;
+import com.pmplugin4j.manager.TenantPluginSelector;
 import com.pmplugin4j.registry.DefaultSpiRegistry;
 import com.pmplugin4j.registry.SpiRegistry;
 import java.nio.file.Path;
@@ -24,6 +26,17 @@ public class Pf4jPluginAutoConfiguration {
     public PmPluginManager pmPluginManager(PluginProperties pluginProperties) {
         Path pluginsRoot = Paths.get(pluginProperties.getDirectory()).toAbsolutePath().normalize();
         return new PmPluginManager(pluginsRoot, pluginProperties);
+    }
+
+    @Bean
+    public TenantPluginSelector tenantPluginSelector(PluginProperties pluginProperties) {
+        return new TenantPluginSelector(pluginProperties);
+    }
+
+    @Bean
+    public PmPluginBootstrap pmPluginBootstrap(PmPluginManager pluginManager,
+            TenantPluginSelector tenantPluginSelector) {
+        return new PmPluginBootstrap(pluginManager, tenantPluginSelector);
     }
 
     @Bean

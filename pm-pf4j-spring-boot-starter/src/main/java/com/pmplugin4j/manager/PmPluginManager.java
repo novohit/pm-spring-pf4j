@@ -11,6 +11,7 @@ import com.pmplugin4j.factory.PmPluginFactory;
 import com.pmplugin4j.lifecycle.PluginResourceRegistrar;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -101,6 +102,19 @@ public class PmPluginManager extends PmJarPluginManager implements ApplicationCo
     public void startPlugins() {
         startingErrors.clear();
         getResolvedPlugins().stream()
+            .sorted(Comparator.comparingInt(this::getOrder))
+            .map(PluginWrapper::getPluginId)
+            .forEach(this::startPlugin);
+        if (!startingErrors.isEmpty()) {
+            log.error("[PF4J] Plugin startup failures ({}):", startingErrors.size());
+            logPluginErrors();
+        }
+    }
+
+    public void startPlugins(Collection<String> enabledPluginIds) {
+        startingErrors.clear();
+        getResolvedPlugins().stream()
+            .filter(wrapper -> enabledPluginIds.contains(wrapper.getPluginId()))
             .sorted(Comparator.comparingInt(this::getOrder))
             .map(PluginWrapper::getPluginId)
             .forEach(this::startPlugin);
