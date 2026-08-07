@@ -8,10 +8,13 @@ import com.pmplugin4j.hotreload.PmPluginHotReloadManager;
 import com.pmplugin4j.manager.PmPluginBootstrap;
 import com.pmplugin4j.manager.PmPluginManager;
 import com.pmplugin4j.manager.PmPluginService;
+import com.pmplugin4j.mybatis.PluginMybatisRegistrar;
 import com.pmplugin4j.registry.SpiRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 
 class Pf4jStarterIntegrationTest {
 
@@ -32,6 +35,14 @@ class Pf4jStarterIntegrationTest {
     }
 
     @Test
+    void starterAutoConfiguresDefaultMybatisIntegration() {
+        new ApplicationContextRunner().withUserConfiguration(TestApplication.class).run(context -> {
+            assertThat(context).hasSingleBean(PmPluginManager.class);
+            assertThat(context).hasSingleBean(PluginMybatisRegistrar.class);
+        });
+    }
+
+    @Test
     void starterCanBeDisabledWithConfigurationProperty() {
         contextRunner.withPropertyValues("pm.pf4j.enabled=false").run(context -> {
             assertThat(context).doesNotHaveBean(PmPluginManager.class);
@@ -41,5 +52,10 @@ class Pf4jStarterIntegrationTest {
             assertThat(context).doesNotHaveBean(SpiRegistry.class);
             assertThat(context).doesNotHaveBean(EventBus.class);
         });
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableAutoConfiguration
+    static class TestApplication {
     }
 }

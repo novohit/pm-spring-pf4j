@@ -51,7 +51,7 @@ these hooks to commit formatting, Checkstyle, or Conventional Commit violations.
 | `pm-pf4j-mybatis` | Plugin-owned MyBatis mapper and SqlSession resources |
 | `pm-pf4j-jpa` | Plugin-owned JPA EntityManager and repository resources |
 | `pm-pf4j-security` | Unified authentication orchestration and conditional Servlet/Reactive six-slot filter integration |
-| `pm-pf4j-spring-boot-starter` | Auto-configuration, tenant orchestration, host context integration, and dependency entry point |
+| `pm-pf4j-spring-boot-starter` | Auto-configuration, tenant orchestration, host context integration, and the default Web/MyBatis dependency entry point |
 | `pm-pf4j-testkit` | Reusable host/plugin lifecycle testing support |
 | `pm-pf4j-integration-tests` | Non-published cross-module runtime and auto-configuration verification |
 | `pm-pf4j-archetype` | Maven project generator for a minimal plugin |
@@ -80,7 +80,12 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
   unload.
 - Host applications may expose services to plugins through explicit APIs; plugin internals must not
   leak into the host context.
-- MyBatis and JPA integrations are independent optional modules. A host may enable either or both.
+- MyBatis is the default data integration supplied by the starter and must remain compatible with MyBatis-Plus. JPA is
+  an independent optional module that hosts add explicitly.
+- The MyBatis integration is a bridge over host-owned `SqlSessionFactory` infrastructure. Depend only on MyBatis and
+  MyBatis-Spring APIs; do not transitively select a MyBatis or MyBatis-Plus Boot starter for the host.
+- Keep host platform versions authoritative: document the Spring Boot BOM before `pm-pf4j-bom`, and use the PM BOM
+  for published framework coordinates plus non-Spring dependency baselines.
 - Security integrations must preserve host-controlled authorization, deterministic plugin cleanup,
   and the six host-authorized filter extension positions around the framework authentication slot.
 - Servlet and reactive Security adapters share one artifact; web application conditions must ensure

@@ -26,7 +26,7 @@ pm-spring-pf4j
 ├── pm-pf4j-spring-boot-starter  Auto-configuration and host dependency entry point
 ├── pm-pf4j-web                  MVC and WebFlux integration
 ├── pm-pf4j-security             MVC and WebFlux security integration
-├── pm-pf4j-mybatis              Optional MyBatis integration
+├── pm-pf4j-mybatis              Default MyBatis/MyBatis-Plus integration
 ├── pm-pf4j-jpa                  Optional JPA integration
 ├── pm-pf4j-testkit              Reusable plugin testing support
 ├── pm-pf4j-integration-tests    Cross-module runtime verification
@@ -67,6 +67,15 @@ Published artifacts use the Maven group `io.github.novohit`. Java packages remai
 ```xml
 <dependencyManagement>
     <dependencies>
+        <!-- The host platform comes first and owns Spring ecosystem versions. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>${spring-boot.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <!-- PM PF4J supplies framework modules and non-Spring fallback versions. -->
         <dependency>
             <groupId>io.github.novohit</groupId>
             <artifactId>pm-pf4j-bom</artifactId>
@@ -78,12 +87,23 @@ Published artifacts use the Maven group `io.github.novohit`. Java packages remai
 </dependencyManagement>
 
 <dependencies>
-<dependency>
-    <groupId>io.github.novohit</groupId>
-    <artifactId>pm-pf4j-spring-boot-starter</artifactId>
-</dependency>
+    <dependency>
+        <groupId>io.github.novohit</groupId>
+        <artifactId>pm-pf4j-spring-boot-starter</artifactId>
+    </dependency>
 </dependencies>
 ```
+
+The starter includes the core runtime, web integration, and MyBatis plugin bridge. Hosts do not add
+`pm-pf4j-mybatis` separately. The bridge reuses the host's `SqlSessionFactory`, which may be supplied by ordinary
+MyBatis, MyBatis-Plus, or explicit host configuration; it does not bring another Boot data starter or JDBC
+auto-configuration into the host. Its runtime surface is limited to MyBatis, MyBatis-Spring, and Spring JDBC
+APIs. JPA and Security remain explicit opt-in dependencies.
+
+The host's Spring Boot BOM is deliberately imported before `pm-pf4j-bom`. Maven uses the first imported BOM entry
+when two imported BOMs manage the same coordinate, so the host-selected Spring Boot platform remains authoritative.
+The PM PF4J BOM supplies versions for all published framework modules and fallback versions for dependencies such as
+PF4J and MyBatis. A host can still override any individual dependency in its own `dependencyManagement` section.
 
 Pre-release versions are intended for evaluation while the public API is evolving.
 
