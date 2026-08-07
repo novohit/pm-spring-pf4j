@@ -1,6 +1,7 @@
 package com.pmplugin4j.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.pmplugin4j.config.PluginProperties;
@@ -42,6 +43,8 @@ class PmPluginManagerTest {
 
             assertEquals(PluginState.UNLOADED, manager.startPlugin("missing"));
             assertEquals(PluginState.UNLOADED, manager.stopPlugin("missing"));
+            assertFalse(manager.doUnloadPlugin("missing"));
+            assertThrows(IllegalStateException.class, () -> manager.reloadPlugin("missing"));
         }
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class TenantPluginSelectorTest {
+
     @Test
     void directPluginSelectionTakesPrecedenceOverProfile() {
         PluginProperties properties = properties();
@@ -17,6 +18,7 @@ class TenantPluginSelectorTest {
         config.setProfile("shared");
         properties.getTenants().put("tenant", config);
         properties.getProfiles().put("shared", List.of("profile"));
+
         assertEquals(List.of("direct"), new TenantPluginSelector(properties).selectEnabledPlugins());
     }
 
@@ -27,6 +29,7 @@ class TenantPluginSelectorTest {
         config.setProfile("shared");
         properties.getTenants().put("tenant", config);
         properties.getProfiles().put("shared", List.of("one", "two"));
+
         assertEquals(List.of("one", "two"), new TenantPluginSelector(properties).selectEnabledPlugins());
         properties.setCurrentTenant("missing");
         assertTrue(new TenantPluginSelector(properties).selectEnabledPlugins().isEmpty());

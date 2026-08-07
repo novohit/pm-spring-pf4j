@@ -99,7 +99,7 @@ public class Pf4jPluginManagementController {
         PluginOperationResult result = new PluginOperationResult();
         try {
             pluginManager.stopPlugin(pluginId);
-            pluginManager.unloadPlugin(pluginId);
+            pluginManager.doUnloadPlugin(pluginId);
             result.setSuccess(true);
             result.setMessage("插件卸载成功");
         } catch (Exception e) {

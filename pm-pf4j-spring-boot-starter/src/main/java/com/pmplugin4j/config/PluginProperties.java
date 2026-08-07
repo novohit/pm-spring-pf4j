@@ -14,11 +14,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "pm.pf4j")
 public class PluginProperties {
 
+    public static final String DEFAULT_PLUGIN_DIR = "plugins";
+
+    public enum HotReload {
+        MANUAL,
+        WATCH
+    }
+
     /** 是否启用插件系统 */
     private boolean enabled = true;
 
     /** 插件文件存储目录 */
-    private String directory = "plugins";
+    private String directory = DEFAULT_PLUGIN_DIR;
+
+    /** Hot-reload mode: watch plugin files automatically or expose manual operations only. */
+    private HotReload hotReload = HotReload.WATCH;
 
     /** 当前实例的租户ID（启动时确定） */
     private String currentTenant;
@@ -51,6 +61,14 @@ public class PluginProperties {
 
     public void setDirectory(String directory) {
         this.directory = directory;
+    }
+
+    public HotReload getHotReload() {
+        return hotReload;
+    }
+
+    public void setHotReload(HotReload hotReload) {
+        this.hotReload = hotReload;
     }
 
     public String getCurrentTenant() {

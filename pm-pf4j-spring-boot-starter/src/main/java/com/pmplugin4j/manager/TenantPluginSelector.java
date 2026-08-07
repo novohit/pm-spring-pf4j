@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 /** Selects plugin startup roots for the currently configured tenant. */
 public final class TenantPluginSelector {
+
     private static final Logger log = LoggerFactory.getLogger(TenantPluginSelector.class);
     private final PluginProperties properties;
 

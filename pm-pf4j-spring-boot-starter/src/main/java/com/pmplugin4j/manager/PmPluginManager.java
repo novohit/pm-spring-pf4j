@@ -3,12 +3,17 @@ package com.pmplugin4j.manager;
 import com.pmplugin4j.api.PmSpringPlugin;
 import com.pmplugin4j.config.PluginProperties;
 import com.pmplugin4j.descriptor.PmPluginDescriptor;
+import com.pmplugin4j.event.PmPluginAfterInstallEvent;
+import com.pmplugin4j.event.PmPluginBeforeUnloadEvent;
 import com.pmplugin4j.event.PmPluginDisabledEvent;
 import com.pmplugin4j.event.PmPluginStartFailedEvent;
 import com.pmplugin4j.event.PmPluginStartedEvent;
 import com.pmplugin4j.event.PmPluginStartingError;
 import com.pmplugin4j.factory.PmPluginFactory;
+import com.pmplugin4j.hotreload.PluginHotReloadVetoException;
 import com.pmplugin4j.lifecycle.PluginResourceRegistrar;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 import org.pf4j.ExtensionFactory;
 import org.pf4j.PluginFactory;
 import org.pf4j.PluginRuntimeException;
@@ -44,11 +50,13 @@ public class PmPluginManager extends PmJarPluginManager implements ApplicationCo
     private final Set<String> everStartedPluginIds = ConcurrentHashMap.newKeySet();
     private final List<PluginResourceRegistrar> externalRegistrars = new ArrayList<>();
     private final PluginProperties pluginProperties;
+    private final Path pluginsRoot;
     private GenericApplicationContext mainApplicationContext;
     private volatile boolean registrarsFrozen;
 
     public PmPluginManager(Path pluginsRoot, PluginProperties pluginProperties) {
         super(pluginsRoot);
+        this.pluginsRoot = pluginsRoot;
         this.pluginProperties = pluginProperties;
     }
 
@@ -100,15 +108,7 @@ public class PmPluginManager extends PmJarPluginManager implements ApplicationCo
 
     @Override
     public void startPlugins() {
-        startingErrors.clear();
-        getResolvedPlugins().stream()
-            .sorted(Comparator.comparingInt(this::getOrder))
-            .map(PluginWrapper::getPluginId)
-            .forEach(this::startPlugin);
-        if (!startingErrors.isEmpty()) {
-            log.error("[PF4J] Plugin startup failures ({}):", startingErrors.size());
-            logPluginErrors();
-        }
+        startPlugins(getResolvedPlugins().stream().map(PluginWrapper::getPluginId).toList());
     }
 
     public void startPlugins(Collection<String> enabledPluginIds) {
@@ -220,6 +220,80 @@ public class PmPluginManager extends PmJarPluginManager implements ApplicationCo
         return startPlugin(pluginId);
     }
 
+    public PluginState installPlugin(String pluginId) {
+        ReentrantLock lock = getPluginLock(pluginId);
+        lock.lock();
+        try {
+            Path pluginDir = pluginsRoot.resolve(pluginId);
+            if (!Files.isDirectory(pluginDir)) {
+                throw new IllegalStateException("Plugin directory not found: " + pluginDir);
+            }
+            Path jarPath;
+            try (Stream<Path> paths = Files.list(pluginDir)) {
+                jarPath = paths.filter(Files::isRegularFile).filter(path -> {
+                    String fileName = path.getFileName().toString();
+                    return fileName.startsWith(pluginId + "-") && fileName.endsWith(".jar");
+                })
+                    .findFirst()
+                    .orElseThrow(
+                            () -> new IllegalStateException("No JAR file found in plugin directory: " + pluginDir));
+            }
+            loadPlugin(jarPath);
+            PluginState state = startPlugin(pluginId);
+            PmSpringPlugin plugin = (PmSpringPlugin) getPlugin(pluginId).getPlugin();
+            plugin.getApplicationContext()
+                .publishEvent(new PmPluginAfterInstallEvent((PmPluginDescriptor) getPlugin(pluginId).getDescriptor()));
+            return state;
+        } catch (IOException exception) {
+            throw new IllegalStateException("Failed to install plugin: " + pluginId, exception);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void reloadPlugins(boolean restartStartedOnly) {
+        final List<String> startedPluginIds = getStartedPlugins().stream().map(PluginWrapper::getPluginId).toList();
+        stopPlugins();
+        List<String> loadedPluginIds = getPlugins().stream().map(PluginWrapper::getPluginId).toList();
+        loadedPluginIds.forEach(this::unloadPlugin);
+        loadPlugins();
+        if (restartStartedOnly) {
+            startedPluginIds.stream().filter(pluginId -> getPlugin(pluginId) != null).forEach(this::startPlugin);
+        } else {
+            startPlugins();
+        }
+    }
+
+    public PluginState reloadPlugin(String pluginId) {
+        PluginWrapper wrapper = getPlugin(pluginId);
+        if (wrapper == null) {
+            Path pluginDir = pluginsRoot.resolve(pluginId);
+            try (Stream<Path> paths = Files.list(pluginDir)) {
+                Path pluginPath = paths.filter(Files::isRegularFile).filter(path -> {
+                    String fileName = path.getFileName().toString();
+                    return fileName.startsWith(pluginId + "-") && fileName.endsWith(".jar");
+                })
+                    .findFirst()
+                    .orElseThrow(
+                            () -> new IllegalStateException("No JAR file found in plugin directory: " + pluginDir));
+                loadPlugin(pluginPath);
+                return startPlugin(pluginId);
+            } catch (IOException exception) {
+                throw new IllegalStateException("Failed to reload plugin: " + pluginId, exception);
+            }
+        }
+        PluginState previousState = wrapper.getPluginState();
+        if (previousState == PluginState.RESOLVED || previousState == PluginState.STOPPED) {
+            return startPlugin(pluginId);
+        }
+        if (previousState == PluginState.STARTED) {
+            stopPlugin(pluginId);
+            return startPlugin(pluginId);
+        }
+        log.error("Plugin reload '{}' unexpected error for state '{}'", pluginId, previousState);
+        return null;
+    }
+
     @Override
     public boolean disablePlugin(String pluginId) {
         ReentrantLock lock = getPluginLock(pluginId);
@@ -238,6 +312,22 @@ public class PmPluginManager extends PmJarPluginManager implements ApplicationCo
         } finally {
             lock.unlock();
         }
+    }
+
+    public boolean doUnloadPlugin(String pluginId) {
+        PluginWrapper wrapper = getPlugin(pluginId);
+        if (wrapper == null) {
+            return false;
+        }
+        PmSpringPlugin plugin = (PmSpringPlugin) wrapper.getPlugin();
+        try {
+            plugin.getApplicationContext()
+                .publishEvent(new PmPluginBeforeUnloadEvent((PmPluginDescriptor) wrapper.getDescriptor()));
+        } catch (PluginHotReloadVetoException exception) {
+            log.warn("[HotReload] Unload vetoed for plugin {}: {}", pluginId, exception.getMessage());
+            return false;
+        }
+        return super.unloadPlugin(pluginId);
     }
 
     boolean wasEverStarted(String pluginId) {

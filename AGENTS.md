@@ -69,6 +69,10 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
   plugin dependencies retain PF4J's recursive startup semantics.
 - Keep `PmPluginManager` as the single lifecycle and state authority. Multi-tenant support belongs in
   `TenantPluginSelector` and `PmPluginBootstrap`; tenant orchestration must not duplicate plugin state or lifecycle APIs.
+- Route concurrent manual and file-watcher lifecycle operations through `PmPluginService`; never let Hot Reload mutate
+  manager state without its global or per-plugin lock.
+- In watch mode, monitor both the plugin root and existing plugin subdirectories, debounce file events, and honor an
+  unload veto before installing the replacement JAR. Register the root watch before returning from startup.
 - Treat plugin start as transactional: if a registrar fails, roll back resources already registered.
 - Stop and unload resources in reverse registration order.
 - Registration and cleanup operations must be idempotent where practical.

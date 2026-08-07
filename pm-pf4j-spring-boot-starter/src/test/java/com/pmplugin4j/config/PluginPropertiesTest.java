@@ -17,7 +17,7 @@ class PluginPropertiesTest {
         StandardEnvironment environment = new StandardEnvironment();
         environment.getPropertySources()
             .addFirst(new MapPropertySource("test", Map.of("pm.pf4j.enabled", "true", "pm.pf4j.current-tenant", "local",
-                    "pm.pf4j.directory", "build/plugins")));
+                    "pm.pf4j.directory", "build/plugins", "pm.pf4j.hot-reload", "manual")));
 
         PluginProperties properties = Binder.get(environment)
             .bind("pm.pf4j", Bindable.of(PluginProperties.class))
@@ -26,5 +26,6 @@ class PluginPropertiesTest {
         assertTrue(properties.isEnabled());
         assertEquals("local", properties.getCurrentTenant());
         assertEquals("build/plugins", properties.getDirectory());
+        assertEquals(PluginProperties.HotReload.MANUAL, properties.getHotReload());
     }
 }
