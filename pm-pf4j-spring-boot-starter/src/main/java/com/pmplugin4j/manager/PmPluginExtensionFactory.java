@@ -4,6 +4,7 @@ import com.pmplugin4j.api.PmSpringPlugin;
 import org.pf4j.ExtensionFactory;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
 public class PmPluginExtensionFactory implements ExtensionFactory {
@@ -23,6 +24,15 @@ public class PmPluginExtensionFactory implements ExtensionFactory {
             context.getBeanFactory().registerSingleton(extensionClass.getName(), extension);
             return extension;
         }
+    }
+
+    public String getExtensionBeanName(Class<?> extensionClass) {
+        ApplicationContext pluginApplicationContext = getApplicationContext(extensionClass);
+        if (pluginApplicationContext == null) {
+            return null;
+        }
+        String[] beanNames = pluginApplicationContext.getBeanNamesForType(extensionClass);
+        return beanNames.length > 0 ? beanNames[0] : null;
     }
 
     private <T> T createWithoutSpring(Class<T> extensionClass) {

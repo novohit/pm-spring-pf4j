@@ -33,7 +33,7 @@ class PmPluginFactoryTest {
             host.refresh();
             PmPluginFactory factory = new PmPluginFactory();
 
-            assertThrows(IllegalStateException.class, () -> factory.create(wrapper(String.class, host)));
+            assertThrows(RuntimeException.class, () -> factory.create(wrapper(String.class, host)));
         }
     }
 

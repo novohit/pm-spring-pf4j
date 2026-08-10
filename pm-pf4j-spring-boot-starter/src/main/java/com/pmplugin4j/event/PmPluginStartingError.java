@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2025 grejeff.
- */
-
 package com.pmplugin4j.event;
 
 import java.io.Serial;
