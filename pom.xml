@@ -6,7 +6,7 @@
 
     <groupId>io.github.novohit</groupId>
     <artifactId>pm-spring-pf4j</artifactId>
-    <version>0.1.0-alpha.1</version>
+    <version>0.1.0-alpha.3</version>
     <packaging>pom</packaging>
 
     <name>pm-spring-pf4j</name>
