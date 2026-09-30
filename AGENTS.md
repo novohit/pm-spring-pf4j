@@ -129,8 +129,6 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
   `build:`.
 - Do not rewrite or move a tag after its version has been published to Maven Central.
 - Maven Central versions are immutable. Fix a released version by publishing a higher version.
-- Maven Central already contains `0.1.0-alpha.2`; after `0.1.0-alpha.1`, skip directly to
-  `0.1.0-alpha.3` or a higher version.
 - Release tags use `v<version>`, for example `v0.1.0-alpha.1`.
 - The GitHub Release tag must exactly match `${project.version}` with a leading `v`.
 - Never commit Central tokens, GPG private keys, passphrases, generated signatures, Maven `target/`
