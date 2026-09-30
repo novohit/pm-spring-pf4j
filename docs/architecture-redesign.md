@@ -72,7 +72,7 @@ Each plugin receives its own:
 
 - `MybatisSqlSessionFactoryBean` and `SqlSessionFactory`;
 - `SqlSessionTemplate`;
-- mapper scanner restricted to `{pluginBasePackage}.dao`;
+- mapper scanner restricted to `{pluginBasePackage}.db`;
 - configuration and interceptor chain.
 
 It must not mutate the host `SqlSessionFactory` by adding plugin mapper classes. That approach
@@ -108,7 +108,7 @@ initial contract and require an explicit host-provided transaction strategy.
 Defaults derive from the plugin main package rather than requiring the plugin ID to be a Java
 package:
 
-- MyBatis mappers: `{basePackage}.dao`
+- MyBatis mappers: `{basePackage}.db`
 - JPA entities: `{basePackage}.entity`
 - JPA repositories: `{basePackage}.repository`
 

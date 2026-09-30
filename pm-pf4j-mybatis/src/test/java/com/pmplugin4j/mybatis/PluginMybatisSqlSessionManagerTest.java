@@ -2,16 +2,21 @@ package com.pmplugin4j.mybatis;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.pmplugin4j.mybatis.db.SampleRecordMapper;
+import com.pmplugin4j.mybatis.model.SampleRecord;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.support.TransactionTemplate;
 
 class PluginMybatisSqlSessionManagerTest {
 
@@ -38,8 +43,38 @@ class PluginMybatisSqlSessionManagerTest {
 
             BeanDefinition scanner = first.getBeanFactory()
                 .getBeanDefinition("com.example.first_mapperScannerConfigurer");
-            assertEquals("com.example.first.dao", scanner.getPropertyValues().get("basePackage"));
+            assertEquals("com.example.first.db", scanner.getPropertyValues().get("basePackage"));
             assertEquals(2, manager.trackedPluginCount());
+        }
+    }
+
+    @Test
+    void executesBaseMapperOperationsAndParticipatesInPluginTransaction() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource(
+                "jdbc:h2:mem:plugin-mybatis;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE", "sa", "");
+        new JdbcTemplate(dataSource).execute("create table sample_record (id bigint primary key, name varchar(100))");
+        PluginMybatisSqlSessionManager manager = new PluginMybatisSqlSessionManager(dataSource,
+                new MybatisPlusInterceptor());
+
+        try (AnnotationConfigApplicationContext plugin = plugin("com.pmplugin4j.mybatis")) {
+            manager.initializeMyBatisForPlugin(plugin.getId(), "com.pmplugin4j.mybatis", plugin);
+            plugin.refresh();
+
+            SampleRecordMapper mapper = plugin.getBean(SampleRecordMapper.class);
+            DataSourceTransactionManager transactionManager = plugin
+                .getBean("com.pmplugin4j.mybatis_transactionManager", DataSourceTransactionManager.class);
+            TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+
+            transaction.executeWithoutResult(status -> {
+                SampleRecord rolledBack = record(1L, "rolled-back");
+                assertEquals(1, mapper.insert(rolledBack));
+                status.setRollbackOnly();
+            });
+            assertNull(mapper.selectById(1L));
+
+            SampleRecord committed = record(2L, "committed");
+            assertEquals(1, mapper.insert(committed));
+            assertEquals("committed", mapper.selectById(2L).getName());
         }
     }
 
@@ -87,6 +122,13 @@ class PluginMybatisSqlSessionManagerTest {
     private static PluginMybatisSqlSessionManager manager() {
         return new PluginMybatisSqlSessionManager(new DriverManagerDataSource("jdbc:test"),
                 new MybatisPlusInterceptor());
+    }
+
+    private static SampleRecord record(Long id, String name) {
+        SampleRecord record = new SampleRecord();
+        record.setId(id);
+        record.setName(name);
+        return record;
     }
 
     private static AnnotationConfigApplicationContext plugin(String pluginId) {

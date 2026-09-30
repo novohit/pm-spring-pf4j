@@ -71,7 +71,7 @@ public final class PluginMybatisSqlSessionManager {
     public void initializeMyBatisForPlugin(String pluginId, String pluginBasePackage,
             GenericApplicationContext context) {
 
-        String basePackage = getDao(pluginBasePackage);
+        String basePackage = getMapperPackage(pluginBasePackage);
 
         // 0. Avoid repeated initialization
         if (pluginSessionCache.containsKey(pluginId)) {
@@ -80,7 +80,8 @@ public final class PluginMybatisSqlSessionManager {
         }
 
         long startTime = System.currentTimeMillis();
-        log.info("Starting MyBatis initialization for plugin: '{}', scanning DAO package: '{}'", pluginId, basePackage);
+        log.info("Starting MyBatis initialization for plugin: '{}', scanning Mapper package: '{}'", pluginId,
+                basePackage);
 
         try {
             // 1. Create SqlSessionFactory
@@ -126,7 +127,7 @@ public final class PluginMybatisSqlSessionManager {
                         txManagerBeanName, pluginId);
             }
 
-            // 6. Scan DAO packages via MapperScannerConfigurer
+            // 6. Scan Mapper packages via MapperScannerConfigurer
             String scannerBeanName = pluginId + "_mapperScannerConfigurer";
             if (!beanFactory.containsBeanDefinition(scannerBeanName)) {
                 BeanDefinitionBuilder scannerBuilder = BeanDefinitionBuilder
@@ -151,11 +152,11 @@ public final class PluginMybatisSqlSessionManager {
         }
     }
 
-    private static String getDao(String pluginBasePackage) {
+    private static String getMapperPackage(String pluginBasePackage) {
         if (pluginBasePackage == null || pluginBasePackage.trim().isEmpty()) {
             throw new IllegalArgumentException("Plugin base package must not be null or empty");
         }
-        return pluginBasePackage + ".dao";
+        return pluginBasePackage + ".db";
     }
 
     private SqlSessionFactory createSqlSessionFactory(String pluginId) throws Exception {

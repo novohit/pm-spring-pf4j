@@ -97,7 +97,7 @@ Published artifacts use the Maven group `io.github.novohit`. Java packages remai
 The starter includes the core runtime, web integration, and MyBatis-Plus plugin integration. Hosts do not add
 `pm-pf4j-mybatis` separately. When the host provides a `DataSource`, the integration creates an isolated
 `SqlSessionFactory`, `SqlSessionTemplate`, mapper scanner, and transaction manager for each plugin. Mapper interfaces
-are discovered under `{pluginBasePackage}.dao`. The integration does not bring a Boot data starter, JDBC driver, or
+are discovered under `{pluginBasePackage}.db`. The integration does not bring a Boot data starter, JDBC driver, or
 `DataSource` auto-configuration into the host. JPA and Security remain explicit opt-in dependencies.
 
 The host's Spring Boot BOM is deliberately imported before `pm-pf4j-bom`. Maven uses the first imported BOM entry
