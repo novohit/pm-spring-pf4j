@@ -82,8 +82,8 @@ Web MVC, MyBatis, JPA, MongoDB, or host-application business code.
   leak into the host context.
 - MyBatis is the default data integration supplied by the starter and must remain compatible with MyBatis-Plus. JPA is
   an independent optional module that hosts add explicitly.
-- The MyBatis integration is a bridge over host-owned `SqlSessionFactory` infrastructure. Depend only on MyBatis and
-  MyBatis-Spring APIs; do not transitively select a MyBatis or MyBatis-Plus Boot starter for the host.
+- The MyBatis integration creates one plugin-owned `SqlSessionFactory` over the host `DataSource`. Depend on
+  MyBatis-Plus libraries directly, but do not transitively select a MyBatis or MyBatis-Plus Boot starter for the host.
 - Keep host platform versions authoritative: document the Spring Boot BOM before `pm-pf4j-bom`, and use the PM BOM
   for published framework coordinates plus non-Spring dependency baselines.
 - Security integrations must preserve host-controlled authorization, deterministic plugin cleanup,

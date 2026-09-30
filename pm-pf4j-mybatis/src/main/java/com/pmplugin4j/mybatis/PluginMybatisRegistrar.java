@@ -3,13 +3,9 @@ package com.pmplugin4j.mybatis;
 import com.pmplugin4j.lifecycle.BuiltInPluginResourceRegistrar;
 import com.pmplugin4j.lifecycle.PluginLifecyclePhase;
 import java.util.Set;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /** Registers plugin-owned MyBatis resources in a plugin application context. */
@@ -19,34 +15,41 @@ public final class PluginMybatisRegistrar implements BuiltInPluginResourceRegist
 
     @Override
     public Set<PluginLifecyclePhase> phases() {
-        return Set.of(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH);
+        return Set.of(PluginLifecyclePhase.BEFORE_CONTEXT_REFRESH, PluginLifecyclePhase.BEFORE_CONTEXT_CLOSE);
     }
 
     @Override
     public int order() {
-        return 3;
+        // Must run after PluginJpaRegistrar (order=20), so an existing plugin JpaTransactionManager can be detected
+        // and reused instead of registering a competing DataSourceTransactionManager.
+        return 30;
     }
 
     @Override
     public void onBeforeContextRefresh(AnnotationConfigApplicationContext pluginApplicationContext) {
         String pluginId = pluginApplicationContext.getId();
         String basePackage = pluginApplicationContext.getEnvironment().getRequiredProperty("pm.plugin.base-package");
-        SqlSessionFactory sqlSessionFactory = pluginApplicationContext.getParent()
-            .getBeanProvider(SqlSessionFactory.class)
-            .getIfAvailable();
-        if (sqlSessionFactory == null) {
-            log.debug("[{}] MyBatis is not available, skipping mapper registration", pluginId);
+        PluginMybatisSqlSessionManager manager = manager(pluginApplicationContext);
+        if (manager == null) {
+            log.debug("[{}] MyBatis session manager is not available, skipping mapper registration", pluginId);
             return;
         }
-        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) pluginApplicationContext.getBeanFactory();
+        manager.initializeMyBatisForPlugin(pluginId, basePackage, pluginApplicationContext);
+    }
 
-        String templateBeanName = pluginId + "_sqlSessionTemplate";
-        beanFactory.registerSingleton(templateBeanName, new SqlSessionTemplate(sqlSessionFactory));
+    @Override
+    public void onBeforeContextClose(AnnotationConfigApplicationContext pluginApplicationContext) {
+        PluginMybatisSqlSessionManager manager = manager(pluginApplicationContext);
+        if (manager != null) {
+            manager.cleanupPluginResources(pluginApplicationContext.getId());
+        }
+    }
 
-        BeanDefinitionBuilder scanner = BeanDefinitionBuilder.genericBeanDefinition(MapperScannerConfigurer.class);
-        scanner.addPropertyValue("basePackage", basePackage + ".db.mapper");
-        scanner.addPropertyValue("sqlSessionTemplateBeanName", templateBeanName);
-        beanFactory.registerBeanDefinition(pluginId + "_mapperScanner", scanner.getBeanDefinition());
-        log.info("[{}] Registered MyBatis mapper package: {}", pluginId, basePackage);
+    private static PluginMybatisSqlSessionManager manager(AnnotationConfigApplicationContext pluginApplicationContext) {
+        ApplicationContext host = pluginApplicationContext.getParent();
+        if (host == null) {
+            return null;
+        }
+        return host.getBeanProvider(PluginMybatisSqlSessionManager.class).getIfAvailable();
     }
 }
