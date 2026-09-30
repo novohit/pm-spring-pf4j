@@ -21,7 +21,7 @@ public final class PluginJpaRegistrar implements BuiltInPluginResourceRegistrar 
 
     @Override
     public void onBeforeContextRefresh(AnnotationConfigApplicationContext pluginContext) {
-        PluginJpaManager manager = manager(pluginContext);
+        PluginJpaPersistenceManager manager = manager(pluginContext);
         if (manager == null) {
             return;
         }
@@ -29,22 +29,22 @@ public final class PluginJpaRegistrar implements BuiltInPluginResourceRegistrar 
         if (basePackage == null || basePackage.isBlank()) {
             throw new IllegalStateException("Missing pm.plugin.base-package for JPA initialization");
         }
-        manager.initialize(pluginContext.getId(), basePackage + ".entity", pluginContext);
+        manager.initializeJpaForPlugin(pluginContext.getId(), basePackage, pluginContext);
     }
 
     @Override
     public void onBeforeContextClose(AnnotationConfigApplicationContext pluginContext) {
-        PluginJpaManager manager = manager(pluginContext);
+        PluginJpaPersistenceManager manager = manager(pluginContext);
         if (manager != null) {
-            manager.cleanup(pluginContext.getId(), pluginContext);
+            manager.cleanupPluginResources(pluginContext.getId(), pluginContext);
         }
     }
 
-    private static PluginJpaManager manager(AnnotationConfigApplicationContext pluginContext) {
+    private static PluginJpaPersistenceManager manager(AnnotationConfigApplicationContext pluginContext) {
         ApplicationContext host = pluginContext.getParent();
         if (host == null) {
             return null;
         }
-        return host.getBeanProvider(PluginJpaManager.class).getIfAvailable();
+        return host.getBeanProvider(PluginJpaPersistenceManager.class).getIfAvailable();
     }
 }

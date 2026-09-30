@@ -20,14 +20,16 @@ public class PluginJpaAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     JpaVendorAdapter pluginJpaVendorAdapter() {
-        return new HibernateJpaVendorAdapter();
+        HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
+        adapter.setShowSql(false);
+        return adapter;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    PluginJpaManager pluginJpaManager(DataSource dataSource, JpaVendorAdapter vendorAdapter,
+    PluginJpaPersistenceManager pluginJpaPersistenceManager(DataSource dataSource, JpaVendorAdapter vendorAdapter,
             PluginJpaProperties properties) {
-        return new PluginJpaManager(dataSource, vendorAdapter, properties);
+        return new PluginJpaPersistenceManager(dataSource, vendorAdapter, properties);
     }
 
     @Bean
