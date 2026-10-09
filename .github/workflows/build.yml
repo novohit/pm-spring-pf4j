@@ -19,5 +19,15 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
+      - name: Set up Maven 3.9.10
+        run: |
+          # Maven 3.10 adds local metadata to Central publishing bundles; keep CI on the verified version.
+          curl --fail --silent --show-error --location --retry 3 \
+            https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.10/apache-maven-3.9.10-bin.tar.gz \
+            -o "$RUNNER_TEMP/maven.tar.gz"
+          tar -xzf "$RUNNER_TEMP/maven.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/apache-maven-3.9.10/bin" >> "$GITHUB_PATH"
+      - name: Show Maven version
+        run: mvn --version
       - name: Verify formatting, style, and tests
         run: mvn --batch-mode --no-transfer-progress clean verify
