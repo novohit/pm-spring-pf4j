@@ -100,6 +100,11 @@ The starter includes the core runtime, web integration, and MyBatis-Plus plugin 
 are discovered under `{pluginBasePackage}.db`. The integration does not bring a Boot data starter, JDBC driver, or
 `DataSource` auto-configuration into the host. JPA and Security remain explicit opt-in dependencies.
 
+Plugin MyBatis runtimes reuse the host's `MetaObjectHandler` when available, so audit-field filling works
+without plugin configuration. Hosts without a handler remain supported; use `@Primary` to select one when
+multiple handlers exist. Each plugin owns its `GlobalConfig` and shares only the handler, not the host's mutable
+factory configuration.
+
 The host's Spring Boot BOM is deliberately imported before `pm-pf4j-bom`. Maven uses the first imported BOM entry
 when two imported BOMs manage the same coordinate, so the host-selected Spring Boot platform remains authoritative.
 The PM PF4J BOM supplies versions for all published framework modules and fallback versions for dependencies such as

@@ -14,7 +14,7 @@ class PluginMybatisRegistrarTest {
     @Test
     void delegatesInitializationAndCleanupToHostManager() {
         PluginMybatisSqlSessionManager manager = new PluginMybatisSqlSessionManager(
-                new DriverManagerDataSource("jdbc:test"), new MybatisPlusInterceptor());
+                new DriverManagerDataSource("jdbc:test"), new MybatisPlusInterceptor(), null);
         try (AnnotationConfigApplicationContext host = new AnnotationConfigApplicationContext();
                 AnnotationConfigApplicationContext plugin = new AnnotationConfigApplicationContext()) {
             host.getBeanFactory().registerSingleton("pluginMybatisSqlSessionManager", manager);

@@ -54,7 +54,7 @@ class PluginMybatisSqlSessionManagerTest {
                 "jdbc:h2:mem:plugin-mybatis;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE", "sa", "");
         new JdbcTemplate(dataSource).execute("create table sample_record (id bigint primary key, name varchar(100))");
         PluginMybatisSqlSessionManager manager = new PluginMybatisSqlSessionManager(dataSource,
-                new MybatisPlusInterceptor());
+                new MybatisPlusInterceptor(), null);
 
         try (AnnotationConfigApplicationContext plugin = plugin("com.pmplugin4j.mybatis")) {
             manager.initializeMyBatisForPlugin(plugin.getId(), "com.pmplugin4j.mybatis", plugin);
@@ -121,7 +121,7 @@ class PluginMybatisSqlSessionManagerTest {
 
     private static PluginMybatisSqlSessionManager manager() {
         return new PluginMybatisSqlSessionManager(new DriverManagerDataSource("jdbc:test"),
-                new MybatisPlusInterceptor());
+                new MybatisPlusInterceptor(), null);
     }
 
     private static SampleRecord record(Long id, String name) {

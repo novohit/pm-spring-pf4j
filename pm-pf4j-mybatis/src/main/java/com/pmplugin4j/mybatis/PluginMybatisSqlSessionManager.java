@@ -2,6 +2,7 @@ package com.pmplugin4j.mybatis;
 
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /** Creates and tracks an independent MyBatis runtime for each plugin. */
 public final class PluginMybatisSqlSessionManager {
@@ -30,6 +32,7 @@ public final class PluginMybatisSqlSessionManager {
     private final ConcurrentHashMap<String, SqlSessionTemplate> pluginSessionCache = new ConcurrentHashMap<>();
     private final DataSource dataSource;
     private final MybatisPlusInterceptor mybatisPlusInterceptor;
+    private final MetaObjectHandler metaObjectHandler;
 
     /**
      * Shared across all plugins to avoid repeated DNS/network-interface probing that occurs when MyBatis-Plus
@@ -39,9 +42,10 @@ public final class PluginMybatisSqlSessionManager {
     private volatile IdentifierGenerator sharedIdentifierGenerator;
 
     public PluginMybatisSqlSessionManager(@NonNull DataSource dataSource,
-            @NonNull MybatisPlusInterceptor mybatisPlusInterceptor) {
+            @NonNull MybatisPlusInterceptor mybatisPlusInterceptor, @Nullable MetaObjectHandler metaObjectHandler) {
         this.dataSource = dataSource;
         this.mybatisPlusInterceptor = mybatisPlusInterceptor;
+        this.metaObjectHandler = metaObjectHandler;
         log.info("PluginMybatisSqlSessionManager initialized with shared DataSource: {}",
                 dataSource.getClass().getSimpleName());
     }
@@ -148,7 +152,8 @@ public final class PluginMybatisSqlSessionManager {
             log.error("Failed to initialize MyBatis for plugin: '{}' (took {} ms). Cause: {}", pluginId, duration,
                     exception.getMessage(), exception);
             cleanupPluginResources(pluginId);
-            throw new IllegalStateException("MyBatis initialization failed for plugin: " + pluginId, exception);
+            throw new IllegalStateException(
+                    "MyBatis initialization failed for plugin: " + pluginId + ": " + exception.getMessage(), exception);
         }
     }
 
@@ -182,6 +187,12 @@ public final class PluginMybatisSqlSessionManager {
         factory.setPlugins(mybatisPlusInterceptor);
         GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setIdentifierGenerator(resolveSharedIdentifierGenerator());
+        // Each plugin owns its GlobalConfig, but shares the host's audit-field filling policy. A manually created
+        // factory does not discover Spring MetaObjectHandler beans automatically, so wire the handler explicitly.
+        // Do not share the host's entire GlobalConfig: it contains factory-specific mutable state.
+        if (metaObjectHandler != null) {
+            globalConfig.setMetaObjectHandler(metaObjectHandler);
+        }
         factory.setGlobalConfig(globalConfig);
         factory.setTransactionFactory(new SpringManagedTransactionFactory());
         log.info("MyBatis factory configured with plugin: '{}'", pluginId);
